@@ -1,0 +1,64 @@
+135a136,137
+> use phys_grid,        only: get_rlat_all_p  !zsm
+> 
+355a358
+>      mgrlats,                                                    & !zsm
+373c376
+<      sadice,                       sadsnow,                      &
+---
+>      sadice, sadliq,               sadsnow,                      & !zsm
+450a454
+>   real(r8), intent(in) :: mgrlats(mgncol)! latitudes in radians !zsm
+505a510
+>   real(r8), intent(out) :: sadliq(mgncol,nlev)       ! cloud ice surface area density (cm2/cm3) !zsm
+829a835,836
+>   real(r8) :: wbfeffmult(mgncol,nlev) ! wbf efficiency multiplier !zsm
+> 
+1000a1008,1009
+>   wbfeffmult = 1._r8 !zsm
+> 
+1050a1060
+>   sadliq = 0._r8 !zsm
+1286a1297,1300
+>      ! Double WBF efficiency if in arctic !zsm
+>      do i=1,mgncol
+>         if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) wbfeffmult(i,k) = 2._r8
+>      end do
+1531c1545
+<      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor
+---
+>      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm
+1540c1554
+<         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor
+---
+>         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm
+1688c1702,1704
+<            nsubr(i,k) = pre(i,k)*nr(i,k)/qr(i,k)
+---
+>            dum = pre(i,k)*deltat/qr(i,k)
+>            dum = max(-1._r8,dum)
+>            nsubr(i,k) = dum*nr(i,k)/deltat
+2838a2855,2856
+>            sadliq(i,k) = dumnc(i,k)/gamma(pgam(i,k)+1._r8)*pi*gamma(pgam(i,k)+3._r8)/(4._r8*lamc(i,k)**2._r8) !zsm
+> 
+2862a2881
+>            sadliq(i,k)=0._r8 !zsm
+3118,3119c3137,3138
+< pure subroutine micro_mg_get_cols(ncol, nlev, top_lev, qcn, qin, &
+<      qrn, qsn, mgncol, mgcols)
+---
+> subroutine micro_mg_get_cols(lchnk, ncol, nlev, top_lev, qcn, qin, & !zsm
+>      qrn, qsn, mgncol, mgcols, mgrlats) !zsm
+3123a3143
+>   integer, intent(in) :: lchnk     !zsm
+3134a3155
+>   real(r8), allocatable, intent(out) :: mgrlats(:) ! zsm
+3138a3160,3161
+>   real(r8) :: rlats(ncol) ! degrees in radians for all columns in chunk !zsm
+> 
+3141a3165
+>   if (allocated(mgrlats)) deallocate(mgrlats) !zsm
+3157a3182
+>   allocate(mgrlats(mgncol)) !zsm
+3162a3188
+>         mgrlats(i) = rlats(ii) !zsm

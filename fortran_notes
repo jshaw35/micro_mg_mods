@@ -1,0 +1,33 @@
+! Jonah testings FORTRAN 90 functions
+
+SELECT CASE (Freq_Fly_Points)
+  CASE (:19999)
+     WRITE(*,*) 'Keep flying - no free ticket yet!'
+  CASE(20000:49999)
+     WRITE(*,*) 'Woo-Hoo!!  Free ticket in continental U.S.!'
+  CASE(50000:)
+     WRITE(*,*) 'Hawaii here I come!!'
+  CASE DEFAULT
+     WRITE(*,*) 'Sorry - you aren't going anywhere  :( '
+END SELECT
+
+
+! Initializing two arrays. With first index 1 and 0, respectively.
+REAL, DIMENSION(10) :: A, B
+INTEGER, DIMENSION(0:9) :: C	
+
+! Assign values with this:
+A = (/ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 /)
+A = (/ (I, I = 1, 10) /)
+
+! Assigning values to one array based on the values of another (synchronous indices)
+WHERE (A > 5)
+  B = 1.
+ELSEWHERE
+  B = 0.
+END WHERE
+
+! Multi-dimensional arrays
+REAL, DIMENSION(2,3) :: A
+REAL, DIMENSION(0:1,0:2) :: B
+INTEGER, DIMENSION(10,20,3) :: I
