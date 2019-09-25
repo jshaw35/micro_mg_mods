@@ -1,8 +1,8 @@
 89a90,91
-> use cam_history_support, only: add_hist_coord !zsm
+> use cam_history_support, only: add_hist_coord !zsm jks not sure of this
 > 
 141a144,157
-> ! SLF output - new dimensions !zsm
+> ! SLF output - new dimensions !zsm, nine isotherms from 0 to -40 C
 > integer, parameter :: nisotherms_mpc = 9
 > real(r8), target :: isotherms_mpc_midpoints(nisotherms_mpc)
 > real(r8), target :: isotherms_mpc_bounds(2,nisotherms_mpc)
@@ -17,7 +17,7 @@
 > !--- !zsm
 > 
 160a177
->    sadliq_idx,         & !zsm
+>    sadliq_idx,         & !zsm, index for surface area liquid density index?
 233a251,252
 >    prec_dp_idx = -1,        & !zsm
 >    prec_sh_idx = -1,        & !zsm
@@ -40,15 +40,17 @@
 > 
 >    ! Fill in info on new dimensions
 > 
->    do t=1,nisotherms_mpc
->       isotherms_mpc_midpoints(t)=273.15_r8-5._r8*(nisotherms_mpc-t)
->       isotherms_mpc_bounds(1,t)=isotherms_mpc_midpoints(t)-1.0_r8
->       isotherms_mpc_bounds(2,t)=isotherms_mpc_midpoints(t)+1.0_r8
+>    do t=1,nisotherms_mpc 		! for each isotherm
+>       isotherms_mpc_midpoints(t)=273.15_r8-5._r8*(nisotherms_mpc-t)  		! create steps of 5C going down from 0C to -40C
+>       isotherms_mpc_bounds(1,t)=isotherms_mpc_midpoints(t)-1.0_r8		! one degree less than the midpoints array i.e. (-1, -6, -11...)
+>       isotherms_mpc_bounds(2,t)=isotherms_mpc_midpoints(t)+1.0_r8		! One degree more
 >    end do
 > 
+! I don't know what this function does, or what the inputs are. Why 2,5C and not 1C?
 >    call add_hist_coord('isotherms_mpc', nisotherms_mpc, 'mixed-phase cloud isotherms (data within 2.5C)',  &
 >            'C', isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds)
 > 
+! Manually define the bins for slfs
 >    slfbins_midpoints   = (/ 5.e-31_r8, .00005_r8, .00055_r8, .0055_r8, .055_r8, .5_r8, &
 >                             .945_r8, .9945_r8, .99945_r8, .99995_r8,       1._r8-5.e-31 /)
 >    slfbins_bounds(1,:) = (/ 0._r8,     1.e-30_r8, .0001_r8,  .001_r8,  .01_r8, .1_r8,  &
@@ -63,7 +65,7 @@
 >    precipbins_bounds(2,1) = 1.e-3_r8
 >    precipbins_midpoints(1) = 5.e-4_r8
 >    do pr=2,nprecipbins
->       precipbins_bounds(1,pr)= precipbins_bounds(2,pr-1)
+>       precipbins_bounds(1,pr)= precipbins_bounds(2,pr-1)  ! make the bins continuous
 >       if (pr.ne.nprecipbins) then
 >          precipbins_bounds(2,pr)=precipbins_bounds(1,pr) * 10._r8**(5._r8/(nprecipbins-2._r8))
 >       else
@@ -76,6 +78,7 @@
 >            'C', precipbins_midpoints, bounds_name='precipbins_bounds', bounds=precipbins_bounds)
 > 
 >    ! Define new variables
+     ! Format is...: variable mean, subdirectory or dimensions??, type??, ??, string description
 > 
 >    call addfld ('SLFXCLD_ISOTM',        (/'isotherms_mpc'/), 'A', ' ', 'Mean supercooled liquid fraction near isotherm * CLD_ISOTM (discard below thick cloud)' )
 >    call addfld ('SADLIQXCLD_ISOTM',     (/'isotherms_mpc'/), 'A', ' ', 'Mean droplet surface area density near isotherm * CLD_ISOTM (discard below thick cloud)')
@@ -115,7 +118,7 @@
 >    call add_default ('MG_SADLIQ',        1, ' ') !zsm
 > 
 1012a1119,1149
->    ! SLF OUTPUT !zsm
+>    ! SLF OUTPUT !zsm, this is the next step after calling addfld for each variable??
 >    call add_default ('SLFXCLD_ISOTM',        1, ' ')
 >    call add_default ('SADLIQXCLD_ISOTM',     1, ' ')
 >    call add_default ('SADICEXCLD_ISOTM',     1, ' ')
@@ -152,16 +155,16 @@
 1100c1239,1242
 <    integer, allocatable :: mgcols(:) ! Columns with microphysics performed
 ---
->    integer :: lchnk                  !zsm
+>    integer :: lchnk                  !zsm, latitude chunk??
 >    integer, allocatable :: mgcols(:) ! column indices !zsm
->    real(r8), allocatable :: mgrlats(:) ! zsm
+>    real(r8), allocatable :: mgrlats(:) ! zsm, latitude in radians indexed by latlon grid
 > 
 1104a1247
 >    lchnk = state%lchnk               !zsm
 1111c1254
 <       call micro_mg_get_cols2_0(ncol, nlev, top_lev, state%q(:,:,ixcldliq), &
 ---
->       call micro_mg_get_cols2_0(lchnk,ncol, nlev, top_lev, state%q(:,:,ixcldliq), & !zsm
+>       call micro_mg_get_cols2_0(lchnk,ncol, nlev, top_lev, state%q(:,:,ixcldliq), & !zsm, the function most have been modified to take lchnk and mgrlats
 1113c1256
 <            mgncol, mgcols)
 ---
@@ -169,11 +172,11 @@
 1116c1259
 <    call micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, nlev)
 ---
->    call micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgrlats, nlev) !zsm
+>    call micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgrlats, nlev) !zsm, mgrlats added here too
 1120c1263
 < subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, nlev)
 ---
-> subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgrlats, nlev) !zsm
+> subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgrlats, nlev) !zsm, this function also takes an additional variable
 1143a1287
 >    real(r8), intent(in) :: mgrlats(:)  !zsm
 1148a1293
@@ -184,7 +187,7 @@
 >    real(r8):: precc(pcols)                   ! convective precip rate !zsm
 >    real(r8):: precl(pcols)                   ! stratiform precip rate !zsm
 1180a1330,1366
->    ! SLF Calculation - define new variables, etc !zsm
+>    ! SLF Calculation - define new variables, etc !zsm. Defining new arrays previously addfld and add_default
 >    real(r8) :: slfxcld_isotm(pcols,nisotherms_mpc)
 >    real(r8) :: sadliqxcld_isotm(pcols,nisotherms_mpc)
 >    real(r8) :: sadicexcld_isotm(pcols,nisotherms_mpc)
@@ -249,13 +252,13 @@
 ---
 >                  packed_sadice, packed_sadliq,  packed_sadsnow,  & !zsm
 2275a2473,2475
->    precc(:ncol)    = prec_dp(:ncol)  + prec_sh(:ncol) !zsm
->    precl(:ncol)    = prec_sed(:ncol) + prec_pcw(:ncol) !zsm
+>    precc(:ncol)    = prec_dp(:ncol)  + prec_sh(:ncol) !zsm, defines precc up to the last index as the sum of two others
+>    precl(:ncol)    = prec_sed(:ncol) + prec_pcw(:ncol) !zsm, same as above
 > 
 2305a2506,2516
 >          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 >          ! Calculate cloud optical thickness for use making SLF comparable with
->          ! observations !itan/zsm
+>          ! observations !itan/zsm  ! minimum value is 0.01. Not sure what equation is used to calculate tau.
 >           if(cld(i,k) >= 0.01) then
 >              cldtau(i,k) = (abarl + bbarl/rel(i,k)) * iclwpst(i,k)*1000._r8 + &
 >                            (abari + bbari/rei(i,k)) * iciwpst(i,k)*1000._r8
@@ -265,7 +268,7 @@
 >          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 > 
 2408a2620
->       sadliq_grid     => sadliq !zsm
+>       sadliq_grid     => sadliq !zsm. hmm I don't know this syntax.
 2858a3071,3208
 >    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 >    !
@@ -281,6 +284,8 @@
 >    !
 >    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 > 
+	! Initializing variables
+
 >    slfxcld_isotm                     = 0._r8
 >    sadliqxcld_isotm                  = 0._r8
 >    sadicexcld_isotm                  = 0._r8
@@ -345,14 +350,14 @@
 >    ! Calculate variables to match CALIOP (discard instances below thick cloud)
 > 
 >    do i=1,ncol
->      calioptest(i)=.true.
+>      calioptest(i)=.true.  ! instantiate array as true
 >    enddo
 > 
 >    do i=1,ncol
 >     do k=1,pver
->      if (cld(i,k).gt.0.01 .and. (icimrst(i,k)+icwmrst(i,k)).gt.1.e-7_r8) then
->        if (calioptest(i)) then
->          if (cldtau(i,k).gt.3.0) calioptest(i)=.false.
+>      if (cld(i,k).gt.0.01 .and. (icimrst(i,k)+icwmrst(i,k)).gt.1.e-7_r8) then   ! if there is cloud and something greater than...
+>        if (calioptest(i)) then  ! If the variable is true
+>          if (cldtau(i,k).gt.3.0) calioptest(i)=.false.  ! If the cloud is too thick, grid fails caliop test
 > 
 >          do t=1,nisotherms_mpc
 >           if ((state_loc%t(i,k).gt.isotherms_mpc_bounds(1,t)).and.(state_loc%t(i,k).le.isotherms_mpc_bounds(2,t))) then

@@ -1,38 +1,39 @@
 135a136,137
-> use phys_grid,        only: get_rlat_all_p  !zsm
+> use phys_grid,        only: get_rlat_all_p  !zsm, is this the function that creates mgrlats? Where is it called?
 > 
 355a358
->      mgrlats,                                                    & !zsm
+>      mgrlats,                                                    & !zsm declares new mgrlats variable
 373c376
 <      sadice,                       sadsnow,                      &
 ---
->      sadice, sadliq,               sadsnow,                      & !zsm
+>      sadice, sadliq,               sadsnow,                      & !zsm declares the new sadliq variable
 450a454
->   real(r8), intent(in) :: mgrlats(mgncol)! latitudes in radians !zsm
+>   real(r8), intent(in) :: mgrlats(mgncol)! latitudes in radians !zsm, mgrlats defined as an input?
 505a510
->   real(r8), intent(out) :: sadliq(mgncol,nlev)       ! cloud ice surface area density (cm2/cm3) !zsm
+>   real(r8), intent(out) :: sadliq(mgncol,nlev)       ! cloud ice surface area density (cm2/cm3) !zsm sadliq an output?
 829a835,836
->   real(r8) :: wbfeffmult(mgncol,nlev) ! wbf efficiency multiplier !zsm
+>   real(r8) :: wbfeffmult(mgncol,nlev) ! wbf efficiency multiplier !zsm this variable tunes down the wbf efficiency
 > 
 1000a1008,1009
->   wbfeffmult = 1._r8 !zsm
+>   wbfeffmult = 1._r8 !zsm, initially set to have no change
 > 
 1050a1060
->   sadliq = 0._r8 !zsm
+>   sadliq = 0._r8 !zsm, !jks unsure
 1286a1297,1300
->      ! Double WBF efficiency if in arctic !zsm
+>      ! Double WBF efficiency if in arctic !zsm ! easy change can be made here. Arctic will need to be defined.
 >      do i=1,mgncol
->         if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) wbfeffmult(i,k) = 2._r8
+>         if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) wbfeffmult(i,k) = 2._r8   !jks converts mgrlats to degrees, could just define arctic in rads pi*4/18
 >      end do
 1531c1545
 <      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor
 ---
->      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm
+>      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm, the efficiency is actually changed here. This is within the do_cldice subloop of the vert loop. The entire column is modified at once
 1540c1554
 <         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor
 ---
->         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm
+>         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm, berg efficiency changed here as well. Not sure why twice. I think that it is just done once.
 1688c1702,1704
+! Sets a minimum value on nsubr to -1 * nr(i,k) / deltat. Not sure why.<<conservation of rain number??
 <            nsubr(i,k) = pre(i,k)*nr(i,k)/qr(i,k)
 ---
 >            dum = pre(i,k)*deltat/qr(i,k)

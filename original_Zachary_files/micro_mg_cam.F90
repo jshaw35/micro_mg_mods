@@ -799,7 +799,7 @@ subroutine micro_mg_cam_init(pbuf2d)
       isotherms_mpc_bounds(2,t)=isotherms_mpc_midpoints(t)+1.0_r8
    end do
 
-   call add_hist_coord('isotherms_mpc', nisotherms_mpc, 'mixed-phase cloud isotherms (data within 2.5C)',  &
+   call add_hist_coord('isotherms_mpc', nisotherms_mpc, 'mixed-phase cloud isotherms (data within 1.0C)',  &
            'C', isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds)
 
    slfbins_midpoints   = (/ 5.e-31_r8, .00005_r8, .00055_r8, .0055_r8, .055_r8, .5_r8, &

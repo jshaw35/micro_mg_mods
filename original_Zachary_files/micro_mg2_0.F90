@@ -3162,7 +3162,7 @@ subroutine micro_mg_get_cols(lchnk, ncol, nlev, top_lev, qcn, qin, & !zsm
   integer :: i, ii ! column indices
 
   if (allocated(mgcols)) deallocate(mgcols)
-  if (allocated(mgrlats)) deallocate(mgrlats) !zsm
+  if (allocated(mgrlats)) deallocate(mgrlats) !zsm, is this a reset?
 
   lev_offset = top_lev - 1
 
