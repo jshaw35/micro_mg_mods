@@ -3166,6 +3166,8 @@ subroutine micro_mg_get_cols(lchnk, ncol, nlev, top_lev, qcn, qin, & !zsm
 
   lev_offset = top_lev - 1
 
+  call get_rlat_all_p(lchnk, ncol, rlats)
+
   ! Using "any" along dimension 2 collapses across levels, but
   ! not columns, so we know if water is present at any level
   ! in each column.
