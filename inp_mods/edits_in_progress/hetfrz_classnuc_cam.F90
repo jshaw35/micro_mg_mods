@@ -31,6 +31,8 @@ use cam_abortutils, only: endrun
 
 use hetfrz_classnuc,   only: hetfrz_classnuc_init, hetfrz_classnuc_calc
 
+use phys_grid,      only: get_rlat_all_p  !jks 061119, this function will return an array with column latitudes
+
 implicit none
 private
 save
@@ -630,6 +632,11 @@ subroutine hetfrz_classnuc_cam_calc( &
    real(r8) :: na500(pcols,pver)
    real(r8) :: tot_na500(pcols,pver)
 
+   ! perhaps need to declare rlats object  ! jks
+   real(r8), allocatable :: rlats(:)  ! jks, define as an allocatable because the size ncol is not defined yet
+   real(r8)              :: inp_mult  ! jks I think that we just need a single float to do the job here
+   real(r8)              :: inp_tag   ! jks I think that we just need a single float to do the job here
+
    character(128) :: errstring   ! Error status
    !-------------------------------------------------------------------------------
 
@@ -640,6 +647,9 @@ subroutine hetfrz_classnuc_cam_calc( &
       qc    => state%q(:pcols,:pver,cldliq_idx), &
       nc    => state%q(:pcols,:pver,numliq_idx), &
       pmid  => state%pmid               )
+
+   call get_rlat_all_p(lchnk, ncol, rlats) ! jks 191104, get rlats array
+   inp_tag = 1.0_r8 ! jks 191104 this string is to be picked out and replaced with a [0,1] r8
 
    itim_old = pbuf_old_tim_idx()
    call pbuf_get_field(pbuf, ast_idx, ast, start=(/1,1,itim_old/), kount=(/pcols,pver,1/))
@@ -687,12 +697,20 @@ subroutine hetfrz_classnuc_cam_calc( &
 
    ! output aerosols as reference information for heterogeneous freezing
    do i = 1, ncol
+      ! jks calculate whether the latitude is high enough here? It is the first iteration over ncol
+      ! Arctic specific modification of the dust nuclei number ! jks 061119
+      if (rlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) then
+         inp_mult = inp_tag
+      else
+         inp_mult = 1.0_r8
+      end if
+
       do k = top_lev, pver
          call get_aer_num(i, k, ncnst, aer(:,:,:,lchnk), aer_cb(:,:,:,lchnk), rho(i,k), &
             total_aer_num(i,k,:), coated_aer_num(i,k,:), uncoated_aer_num(i,k,:),       &
             total_interstitial_aer_num(i,k,:), total_cloudborne_aer_num(i,k,:),         &
             hetraer(i,k,:), awcam(i,k,:), awfacm(i,k,:), dstcoat(i,k,:),                &
-            na500(i,k), tot_na500(i,k))
+            na500(i,k), tot_na500(i,k), inp_mult) ! jks 061119 pass inp multiplier
 
          fn_cloudborne_aer_num(i,k,1) = total_aer_num(i,k,1)*factnum(i,k,mode_accum_idx)  ! bc
          if (nmodes == MAM3_nmodes .or. nmodes == MAM4_nmodes) then
@@ -913,7 +931,7 @@ subroutine get_aer_num(ii, kk, ncnst, aer, aer_cb, rhoair,&
                        total_interstial_aer_num,          &
                        total_cloudborne_aer_num,          &
                        hetraer, awcam, awfacm, dstcoat,   &
-                       na500, tot_na500)
+                       na500, tot_na500, inp_mult) ! jks 061119
     
    !*****************************************************************************
    ! Purpose: Calculate BC and Dust number, including total number(interstitial+
@@ -927,6 +945,8 @@ subroutine get_aer_num(ii, kk, ncnst, aer, aer_cb, rhoair,&
    real(r8), intent(in) :: aer(pcols,pver,ncnst)    ! interstitial aerosols, volume basis
    real(r8), intent(in) :: aer_cb(pcols,pver,ncnst) ! cloud borne aerosols, volume basis
    real(r8), intent(in) :: rhoair                   ! air density (kg/m3)
+
+   real(r8), intent(in) :: inp_mult                 ! aerosol particle multiplier jks 061119
 
    ! The interstitial and cloud borne aerosol concentrations are accessed from
    ! module variables local to this module.
@@ -1098,13 +1118,13 @@ subroutine get_aer_num(ii, kk, ncnst, aer, aer_cb, rhoair,&
       dst3_num_imm = aer_cb(ii,kk,num_coardust)*1.0e-6_r8 ! #/cm^3
    end if
 
-   total_interstial_aer_num(1) = bc_num
-   total_interstial_aer_num(2) = dst1_num
-   total_interstial_aer_num(3) = dst3_num 
+   total_interstial_aer_num(1) = bc_num * inp_mult ! jks adjust all aerosol numbers
+   total_interstial_aer_num(2) = dst1_num * inp_mult ! jks
+   total_interstial_aer_num(3) = dst3_num * inp_mult ! jks
 
-   total_cloudborne_aer_num(1) = bc_num_imm 
-   total_cloudborne_aer_num(2) = dst1_num_imm 
-   total_cloudborne_aer_num(3) = dst3_num_imm
+   total_cloudborne_aer_num(1) = bc_num_imm * inp_mult ! jks
+   total_cloudborne_aer_num(2) = dst1_num_imm * inp_mult ! jks
+   total_cloudborne_aer_num(3) = dst3_num_imm * inp_mult ! jks
   
    !*****************************************************************************    
    ! calculate mass mean radius
