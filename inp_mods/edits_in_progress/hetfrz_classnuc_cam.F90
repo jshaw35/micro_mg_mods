@@ -649,7 +649,7 @@ subroutine hetfrz_classnuc_cam_calc( &
       pmid  => state%pmid               )
 
    call get_rlat_all_p(lchnk, ncol, rlats) ! jks 191104, get rlats array
-   inp_tag = 1.0_r8 ! jks 191104 this string is to be picked out and replaced with a [0,1] r8
+   inp_tag = 1._r8 ! jks 191104 this string is to be picked out and replaced with a [0,1] r8
 
    itim_old = pbuf_old_tim_idx()
    call pbuf_get_field(pbuf, ast_idx, ast, start=(/1,1,itim_old/), kount=(/pcols,pver,1/))
