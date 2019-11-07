@@ -833,6 +833,7 @@ subroutine micro_mg_tend ( &
   real(r8) :: ifrac
 
   real(r8) :: wbfeffmult(mgncol,nlev) ! wbf efficiency multiplier !zsm
+  real(r8) :: wbf_tag                 ! Arctic multiplier value   !jks 
 
   !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
@@ -1006,6 +1007,7 @@ subroutine micro_mg_tend ( &
   cmeout = 0._r8
 
   wbfeffmult = 1._r8 !zsm
+  wbf_tag = 1._r8    !jks this line is to be modified with a bash script
 
   precip_frac = mincld
 
@@ -1297,7 +1299,7 @@ subroutine micro_mg_tend ( &
      ! Double WBF efficiency if in arctic !zsm !191004 jks added unique tag for wbf
      do i=1,mgncol
 !        if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) wbfeffmult(i,k) = 2._r8
-        if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) wbfeffmult(i,k) = wbf_tag_r8
+        if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) wbfeffmult(i,k) = wbf_tag
 
      end do
 
