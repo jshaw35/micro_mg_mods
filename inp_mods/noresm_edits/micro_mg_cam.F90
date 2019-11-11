@@ -142,18 +142,18 @@ character(len=8), parameter :: &      ! Constituent names
                      'RAINQM', 'SNOWQM','NUMRAI','NUMSNO'/)
 
 ! SLF output - new dimensions !zsm, jks
-                     integer, parameter :: nisotherms_mpc = 9
-                     real(r8), target :: isotherms_mpc_midpoints(nisotherms_mpc)
-                     real(r8), target :: isotherms_mpc_bounds(2,nisotherms_mpc)
-                     
-                     integer, parameter :: nslfbins = 11
-                     real(r8), target :: slfbins_midpoints(nslfbins)
-                     real(r8), target :: slfbins_bounds(2,nslfbins)
-                     
-                     integer, parameter :: nprecipbins = 32
-                     real(r8), target :: precipbins_midpoints(nprecipbins)
-                     real(r8), target :: precipbins_bounds(2,nprecipbins)
-                     !--- !zsm, jks
+integer, parameter :: nisotherms_mpc = 9
+real(r8), target :: isotherms_mpc_midpoints(nisotherms_mpc)
+real(r8), target :: isotherms_mpc_bounds(2,nisotherms_mpc)
+
+integer, parameter :: nslfbins = 11
+real(r8), target :: slfbins_midpoints(nslfbins)
+real(r8), target :: slfbins_bounds(2,nslfbins)
+
+integer, parameter :: nprecipbins = 32
+real(r8), target :: precipbins_midpoints(nprecipbins)
+real(r8), target :: precipbins_bounds(2,nprecipbins)
+!--- !zsm, jks
 
 integer :: &
    ixcldliq = -1,      &! cloud liquid amount index
@@ -1361,7 +1361,7 @@ subroutine micro_mg_cam_tend(state, ptend, dtime, pbuf)
            mgncol, mgcols, mgrlats) !jks
    end select
 
-   call micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, nlev)
+   call micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgrlats, nlev) !jks
 
 end subroutine micro_mg_cam_tend
 
@@ -1389,11 +1389,13 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    integer, intent(in) :: nlev
    integer, intent(in) :: mgncol
    integer, intent(in) :: mgcols(:)
+   real(r8), intent(in) :: mgrlats(:)  !zsm, jks
 
    ! Local variables
    integer :: lchnk, ncol, psetcols, ngrdcol
 
    integer :: i, k, itim_old, it
+   integer :: t, s, pr                 !zsm, jks
 
    real(r8), pointer :: naai(:,:)      ! ice nucleation number
    real(r8), pointer :: naai_hom(:,:)  ! ice nucleation number (homogeneous)
