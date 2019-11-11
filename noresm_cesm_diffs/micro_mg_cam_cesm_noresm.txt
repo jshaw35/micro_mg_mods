@@ -1,0 +1,345 @@
+795a796,833
+> !AL MG microphysics diagnostics number tendencies
+>    call addfld ('NNUCCCO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency immersion freezing'       ) 
+>    call addfld ('NNUCCTO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency contact freezing'         )
+>    call addfld ('NPSACWSO ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency accretion by snow'        )
+>    call addfld ('NSUBCO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency evaporation of droplet'   )
+>    call addfld ('NPRAO    ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency accretion'                )
+>    call addfld ('NPRC1O   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency autoconversion'           )
+>    call addfld ('NQCSEDTEN',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency sedimentation'            )
+>    call addfld ('NQISEDTEN',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency sedimentation'            )
+>    call addfld ('NMELTO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency melting'                  )
+>    call addfld ('NIMELTO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency melting'                  )
+>    call addfld ('NHOMOO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tendency homogeneous freezing'     )
+>    call addfld ('NIHOMOO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency homogeneous freezing'     )
+>    call addfld ('NSACWIO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency from HM'                  )
+>    call addfld ('NSUBIO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency evaporation'              )
+>    call addfld ('NPRCIO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency autoconversion snow'      )
+>    call addfld ('NPRAIO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tendency accretion snow'           )
+>    call addfld ('NNUDEPO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI deposition'                        )
+>    call addfld ('NPCCNO   ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC activation'                        )
+>    call addfld ('NPCCNO2  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC activation'                        )
+>    call addfld ('NNUCCDO  ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI nuccleation'                       )
+>    call addfld ('NCTNCONS ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tuning: conservation of nc '       )
+>    call addfld ('NCTNNBMN ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tuning: minimum nc'                )
+>    call addfld ('NCTNSZMN ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tuning: minimum slope parameter'   )
+>    call addfld ('NCTNSZMX ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tuning: maximum slope parameter'   )
+>    call addfld ('NCTNNCLD ',(/ 'lev' /), 'A', '1/kg/s  ', 'NC tuning: removal of nc for zero cloud water'  )
+>    call addfld ('NITNCONS ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tuning: conservation of ni '                 )
+>    call addfld ('NITNSZMN ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tuning: minimum slope parameter'             )
+>    call addfld ('NITNSZMX ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tuning: maximum slope parameter'             )
+>    call addfld ('NITNNCLD ',(/ 'lev' /), 'A', '1/kg/s  ', 'NI tuning: removal of nI for zero cloud ice'    )
+>    call addfld ('MNUDEPO  ',(/ 'lev' /), 'A', 'kg/kg/s ', 'Mixing ratio deposition'                        )
+>    call addfld ('MPDNLIQ  ',(/ 'lev' /), 'A', '1/kg/s  ', 'CLDLIQ number tendency - Morrison microphysics' )
+>    call addfld ('MPDNICE  ',(/ 'lev' /), 'A', '1/kg/s  ', 'CLDICE number tendency - Morrison microphysics' )
+>    call addfld ('FRZR     ',(/ 'lev' /), 'A', 'kg/kg/s  ', 'Mass freezing rain to snow'    )
+>    call addfld ('NFRZR    ',(/ 'lev' /), 'A', '1/kg/s ', 'Number freezing rain to snow' )
+>    call addfld ('MNUCCRI  ',(/ 'lev' /), 'A', 'kg/kg/s  ', 'Mass freezing rain to ice'  )
+>    call addfld ('NNUCCRI  ',(/ 'lev' /), 'A', '1/kg/s  ', 'Number freezing rain to ice' )
+> 
+850a889,897
+>    !++IH
+>    !For comparing to Bernartz CDNC concentrations
+> !akc6   call addfld ('ACTNL_B    ', horiz_only, 'A', 'Micron  ', 'Average Cloud Top droplet number (Bennartz)'                         )
+>    call addfld ('ACTNL_B    ', horiz_only, 'A', 'm-3',  'Average Cloud Top   droplet number (Bennartz)'                       )
+>    call addfld ('FCTL_B     ', horiz_only, 'A', 'fraction',  'Fractional occurrence of cloud top liquid (Bennartz)'           )
+> !ak6+
+>    call addfld ('CCN_B      ', horiz_only, 'A', 'm-3',  'Average Cloud Top liquid CCN (Bennartz)'                             )
+> !ak6-
+>    !--IH
+946a994,1008
+>       !++IH (Bennartz CDNC comparison) and extra clouds diags
+>       ! made default for NorESM
+>       call add_default ('ACTNL     ', 1, ' ')
+>       call add_default ('ACTREL     ', 1, ' ')
+>       call add_default ('FCTL    ', 1, ' ')
+>       call add_default ('ACTNI     ', 1, ' ')
+>       call add_default ('ACTREI     ', 1, ' ')
+>       call add_default ('FCTI    ', 1, ' ')
+>       !These are for comparing to Bennartz
+>       call add_default ('FCTL_B    ', 1, ' ')
+>       call add_default ('ACTNL_B     ', 1, ' ')
+>       !--IH
+> !akc6+
+>       call add_default ('CCN_B       ', 1, ' ')
+> !akc6-
+994a1057,1099
+> !AL
+>       call add_default ('NNUCCCO  ', budget_histfile, ' ')
+>       call add_default ('NNUCCTO  ', budget_histfile, ' ')
+>       call add_default ('NPSACWSO ', budget_histfile, ' ')
+>       call add_default ('NSUBCO   ', budget_histfile, ' ')
+>       call add_default ('NPRAO    ', budget_histfile, ' ')
+>       call add_default ('NPRC1O   ', budget_histfile, ' ')
+>       call add_default ('NQCSEDTEN', budget_histfile, ' ')
+>       call add_default ('NQISEDTEN', budget_histfile, ' ')
+>       call add_default ('NMELTO   ', budget_histfile, ' ')
+>       call add_default ('NIMELTO  ', budget_histfile, ' ')
+>       call add_default ('NHOMOO   ', budget_histfile, ' ')
+>       call add_default ('NIHOMOO  ', budget_histfile, ' ')
+>       call add_default ('NSACWIO  ', budget_histfile, ' ')
+>       call add_default ('NSUBIO   ', budget_histfile, ' ')
+>       call add_default ('NPRCIO   ', budget_histfile, ' ')
+>       call add_default ('NPRAIO   ', budget_histfile, ' ')
+>       call add_default ('NNUDEPO  ', budget_histfile, ' ')
+>       call add_default ('MNUDEPO  ', budget_histfile, ' ')
+>       call add_default ('NPCCNO   ', budget_histfile, ' ')
+>       call add_default ('NPCCNO2  ', budget_histfile, ' ')
+>       call add_default ('NNUCCDO  ', budget_histfile, ' ')
+> 
+>       call add_default ('NCTNNCLD ', budget_histfile, ' ')
+>       call add_default ('NITNCONS ', budget_histfile, ' ')
+>       call add_default ('NITNNCLD ', budget_histfile, ' ')
+>       call add_default ('NCTNSZMN ', budget_histfile,' ')
+>       call add_default ('NCTNSZMX ', budget_histfile,' ')
+>       call add_default ('NITNSZMN ', budget_histfile,' ')
+>       call add_default ('NITNSZMX ', budget_histfile,' ')
+>       select case (micro_mg_version)
+>       case (1)
+>          call add_default ('NCTNCONS ', budget_histfile, ' ')
+>          call add_default ('NCTNNBMN ', budget_histfile, ' ')
+>       case (2)
+>          call add_default ('FRZR ', budget_histfile, ' ')
+>          call add_default ('NFRZR ', budget_histfile, ' ')
+>          call add_default ('MNUCCRI ', budget_histfile, ' ')
+>          call add_default ('NNUCCRI ', budget_histfile, ' ')
+>       end select
+>       call add_default ('MPDNLIQ  ', budget_histfile, ' ')
+>       call add_default ('MPDNICE  ', budget_histfile, ' ')
+> !AL
+1262a1368,1402
+> !AL
+>    real(r8), target :: nnuccco(state%psetcols,pver)   ! immersion freezing
+>    real(r8), target :: nnuccto(state%psetcols,pver)   ! contact freezing
+>    real(r8), target :: npsacwso(state%psetcols,pver)  ! accr. snow
+>    real(r8), target :: nsubco(state%psetcols,pver)    ! evaporation of droplet 
+>    real(r8), target :: nprao(state%psetcols,pver)     ! accretion
+>    real(r8), target :: nprc1o(state%psetcols,pver)    ! autoconversion
+>    real(r8), target :: nqcsedten(state%psetcols,pver) ! nqc sedimentation tendency
+>    real(r8), target :: nqisedten(state%psetcols,pver) ! nqc sedimentation tendency
+>    real(r8), target :: nmelto(state%psetcols,pver)    ! melting of cloud ice
+>    real(r8), target :: nhomoo(state%psetcols,pver)    ! homogeneos freezign cloud water
+>    real(r8), target :: nimelto(state%psetcols,pver)   ! melting of cloud ice
+>    real(r8), target :: nihomoo(state%psetcols,pver)   ! homogeneos freezign cloud water
+>    real(r8), target :: nsacwio(state%psetcols,pver)   ! numb conc tend due to HM ice multiplication
+>    real(r8), target :: nsubio(state%psetcols,pver)    ! evaporation of cloud ice number (sublimation?)
+>    real(r8), target :: nprcio(state%psetcols,pver)    ! numb conc tend due to auto of cloud ice to snow
+>    real(r8), target :: npraio(state%psetcols,pver)    ! numb conc tend due to accr of cloud ice by snow
+>    real(r8), target :: nnudepo(state%psetcols,pver)   ! deposition?
+>    real(r8), target :: npccno(state%psetcols,pver)    ! activation
+>    real(r8), target :: nnuccdo(state%psetcols,pver)   ! nucleation (ice)
+>    real(r8), target :: mnudepo(state%psetcols,pver)   ! deposition
+>    real(r8), target :: nctncons(state%psetcols,pver)   ! correction term
+>    real(r8), target :: nctnnbmn(state%psetcols,pver)   ! correction if below minimum number
+>    real(r8), target :: nctnszmn(state%psetcols,pver)   ! gamma adjustment (liquid)
+>    real(r8), target :: nctnszmx(state%psetcols,pver)   ! gamma adjustment (liquid)
+>    real(r8), target :: nctnncld(state%psetcols,pver)   ! correction for no cloud
+>    real(r8), target :: nitncons(state%psetcols,pver)   ! numerical conservation check in sub-time step
+>    real(r8), target :: nitnszmn(state%psetcols,pver)   ! gamma-adjustment (ice)
+>    real(r8), target :: nitnszmx(state%psetcols,pver)   ! gamma-adjustment (ice)
+>    real(r8), target :: nitnncld(state%psetcols,pver)   ! corrrection for no cloud
+>    real(r8), target :: frzr(state%psetcols,pver)       ! mass freezing rain ==>snow
+>    real(r8), target :: nfrzr(state%psetcols,pver)      ! number freezing rain ==> snow
+>    real(r8), target :: mnuccri(state%psetcols,pver)   ! mass freezing rain ==> ice 
+>    real(r8), target :: nnuccri(state%psetcols,pver)   ! number freezing rain ==> ice 
+> !AL
+1408a1549,1584
+> !AL
+>    real(r8), target :: packed_nnuccco(mgncol,nlev)   ! immersion freezing
+>    real(r8), target :: packed_nnuccto(mgncol,nlev)   ! contact freezing
+>    real(r8), target :: packed_npsacwso(mgncol,nlev)  ! accr. snow
+>    real(r8), target :: packed_nsubco(mgncol,nlev)    ! evaporation of droplet 
+>    real(r8), target :: packed_nprao(mgncol,nlev)     ! accretion
+>    real(r8), target :: packed_nprc1o(mgncol,nlev)    ! autoconversion
+>    real(r8), target :: packed_nqcsedten(mgncol,nlev) ! nqc sedimentation tendency
+>    real(r8), target :: packed_nqisedten(mgncol,nlev) ! nqc sedimentation tendency
+>    real(r8), target :: packed_nmelto(mgncol,nlev)    ! melting of cloud ice
+>    real(r8), target :: packed_nhomoo(mgncol,nlev)    ! homogeneos freezign cloud water
+>    real(r8), target :: packed_nimelto(mgncol,nlev)   ! melting of cloud ice
+>    real(r8), target :: packed_nihomoo(mgncol,nlev)   ! homogeneos freezign cloud water
+>    real(r8), target :: packed_nsacwio(mgncol,nlev)   ! numb conc tend due to HM ice multiplication
+>    real(r8), target :: packed_nsubio(mgncol,nlev)    ! evaporation of cloud ice number (sublimation?)
+>    real(r8), target :: packed_nprcio(mgncol,nlev)    ! numb conc tend due to auto of cloud ice to snow
+>    real(r8), target :: packed_npraio(mgncol,nlev)    ! numb conc tend due to accr of cloud ice by snow
+>    real(r8), target :: packed_nnudepo(mgncol,nlev)   ! deposition?
+>    real(r8), target :: packed_npccno(mgncol,nlev)    ! activation
+>    real(r8), target :: packed_nnuccdo(mgncol,nlev)   ! nucleation (ice)
+>    real(r8), target :: packed_mnudepo(mgncol,nlev)   ! deposition
+>    real(r8), target :: packed_nctncons(mgncol,nlev)   ! correction term
+>    real(r8), target :: packed_nctnnbmn(mgncol,nlev)   ! correction if below minimum number
+>    real(r8), target :: packed_nctnszmn(mgncol,nlev)   ! gamma adjustment (liquid)
+>    real(r8), target :: packed_nctnszmx(mgncol,nlev)   ! gamma adjustment (liquid)
+>    real(r8), target :: packed_nctnncld(mgncol,nlev)   ! correction for no cloud
+>    real(r8), target :: packed_nitncons(mgncol,nlev)   ! numerical conservation check in sub-time step
+>    real(r8), target :: packed_nitnszmn(mgncol,nlev)   ! gamma-adjustment (ice)
+>    real(r8), target :: packed_nitnszmx(mgncol,nlev)   ! gamma-adjustment (ice)
+>    real(r8), target :: packed_nitnncld(mgncol,nlev)   ! corrrection for no cloud
+>    real(r8), target :: packed_frzr(mgncol,nlev)       ! mass freezing rain ==> snow 
+>    real(r8), target :: packed_nfrzr(mgncol,nlev)      ! number freezing rain ==> snow
+>    real(r8), target :: packed_mnuccri(mgncol,nlev)    ! mass freezing rain ==> ice
+>    real(r8), target :: packed_nnuccri(mgncol,nlev)    ! number freezing rain ==>ice
+> !AL
+> 
+1505a1682,1688
+>    !++IH: 
+>    real(r8) :: fctl_b(pcols) !frequency of occurrence for Bennartz 
+>    real(r8) :: ctnl_b(pcols) !cdnc [/m3] for Bennartz
+> !akc6+
+>    real(r8) :: ccn_b(pcols)  !ccm [/m3] defined as for cdnc for Bennartz
+> !akc6-
+>    !--IH
+1978a2162,2197
+> !AL
+>    call post_proc%add_field(p(nnuccco), p(packed_nnuccco))
+>    call post_proc%add_field(p(nnuccto), p(packed_nnuccto))
+>    call post_proc%add_field(p(npsacwso), p(packed_npsacwso))
+>    call post_proc%add_field(p(nsubco), p(packed_nsubco))
+>    call post_proc%add_field(p(nprao), p(packed_nprao))
+>    call post_proc%add_field(p(nprc1o), p(packed_nprc1o))
+>    call post_proc%add_field(p(nqcsedten), p(packed_nqcsedten))
+>    call post_proc%add_field(p(nqisedten), p(packed_nqisedten))
+>    call post_proc%add_field(p(nmelto), p(packed_nmelto))
+>    call post_proc%add_field(p(nhomoo), p(packed_nhomoo))
+>    call post_proc%add_field(p(nimelto), p(packed_nimelto))
+>    call post_proc%add_field(p(nihomoo), p(packed_nihomoo))
+>    call post_proc%add_field(p(nsacwio), p(packed_nsacwio))
+>    call post_proc%add_field(p(nsubio), p(packed_nsubio))
+>    call post_proc%add_field(p(nprcio), p(packed_nprcio))
+>    call post_proc%add_field(p(npraio), p(packed_npraio))
+>    call post_proc%add_field(p(nnudepo), p(packed_nnudepo))
+>    call post_proc%add_field(p(npccno), p(packed_npccno))
+>    call post_proc%add_field(p(nnuccdo), p(packed_nnuccdo))
+>    call post_proc%add_field(p(mnudepo), p(packed_mnudepo))
+>    call post_proc%add_field(p(nctncons), p(packed_nctncons))
+>    call post_proc%add_field(p(nctnnbmn), p(packed_nctnnbmn))
+>    call post_proc%add_field(p(nctnszmn), p(packed_nctnszmn))
+>    call post_proc%add_field(p(nctnszmx), p(packed_nctnszmx))
+>    call post_proc%add_field(p(nctnncld), p(packed_nctnncld))
+>    call post_proc%add_field(p(nitncons), p(packed_nitncons))
+>    call post_proc%add_field(p(nitnszmn), p(packed_nitnszmn))
+>    call post_proc%add_field(p(nitnszmx), p(packed_nitnszmx))
+>    call post_proc%add_field(p(nitnncld), p(packed_nitnncld))
+>    call post_proc%add_field(p(frzr), p(packed_frzr))
+>    call post_proc%add_field(p(nfrzr), p(packed_nfrzr))
+>    call post_proc%add_field(p(mnuccri), p(packed_mnuccri))
+>    call post_proc%add_field(p(nnuccri), p(packed_nnuccri))
+> !AL
+> 
+2081c2300,2311
+<                  packed_frzimm, packed_frzcnt, packed_frzdep)
+---
+>                  packed_frzimm, packed_frzcnt, packed_frzdep, &
+> !AL
+>          packed_nnuccco, packed_nnuccto, packed_npsacwso, packed_nsubco, packed_nprao,       &
+>          packed_nprc1o, packed_nqcsedten, packed_nqisedten, packed_nmelto, packed_nhomoo,    &
+>          packed_nimelto, packed_nihomoo, packed_nsacwio, packed_nsubio, packed_nprcio,       &
+>          packed_npraio, packed_nnudepo, packed_npccno, packed_nnuccdo, packed_mnudepo,       &
+>          packed_nctncons, packed_nctnnbmn, packed_nctnszmn,                    &
+>          packed_nctnszmx, packed_nctnncld, packed_nitncons, packed_nitnszmn,          &
+>          packed_nitnszmx, packed_nitnncld)
+> 
+> 
+> !AL
+2140a2371,2385
+> !AL right names?
+>                   packed_nnuccco, packed_nnuccto,  &
+>                   packed_npsacwso, packed_nsubco, packed_nprao,       &
+>                   packed_nprc1o, packed_nqcsedten, &
+>                   packed_nqisedten, packed_nmelto, packed_nhomoo,    &
+>                   packed_nimelto, packed_nihomoo, packed_nsacwio,    &
+>                   packed_nsubio, packed_nprcio,       &
+>                   packed_npraio, packed_nnudepo,      & 
+>                   packed_npccno, packed_nnuccdo, packed_mnudepo,       &
+>                   packed_frzr,packed_nfrzr,        &
+>                   packed_nnuccri, packed_mnuccri,               &
+>                   packed_nctnszmx,packed_nctnszmn, &
+>                   packed_nctnncld, packed_nitncons, &
+>                   packed_nitnszmx, packed_nitnszmn, packed_nitnncld, &
+> !AL
+2812a3058,3063
+>    !++IH for comparign to Bennartz CDNC concentrations 
+>    fctl_b  = 0._r8
+>    ctnl_b  = 0._r8
+> !akc6+
+>    ccn_b   = 0._r8
+> !akc6-
+2858a3110,3144
+>    !Calculate values for comparing with Bennartz 2017
+>    do i = 1, ncol
+>       do k = top_lev, pver
+>          !Criterions for Bennartz (2017) to use values from a column
+>          !1) 268 < T < 300 [K]
+>          !2) liquid cloud fraction > 10 %
+>          if (   liqcldf(i,k) > 0.1_r8   & 
+>                .and. state_loc%t(i,k) > 268.0_r8 & 
+>                .and. state_loc%t(i,k) < 300.0_r8 ) then   
+>             !Save cloud fraction and in-cloud number conc
+>             ctnl_b(i)  = icwnc(i,k) * liqcldf(i,k)
+>             fctl_b(i)  = liqcldf(i,k)
+> !akc6+
+>             ccn_b(i)   = ncal(i,k) * liqcldf(i,k)
+> !akc6-
+>             exit !==> Go out to i=1,ncol-loop
+>          end if
+>          !--IH
+>       end do
+>    end do
+> 
+>    call outfld( 'ACTREL'     , ctrel_grid,     pcols, lchnk )
+>    call outfld( 'ACTREI'     , ctrei_grid,     pcols, lchnk )
+>    call outfld( 'ACTNL'      , ctnl_grid,      pcols, lchnk )
+>    call outfld( 'ACTNI'      , ctni_grid,      pcols, lchnk )
+>    call outfld( 'FCTL'       , fctl_grid,      pcols, lchnk )
+>    call outfld( 'FCTI'       , fcti_grid,      pcols, lchnk )
+>    !++IH 
+>    call outfld( 'FCTL_B'       , fctl_b,      pcols, lchnk )
+>    call outfld( 'ACTNL_B'      , ctnl_b,      pcols, lchnk )
+> !akc6+
+>    call outfld( 'CCN_B'      , ccn_b,          pcols, lchnk )
+> !akc6-
+>    !--IH
+> 
+2931a3218,3260
+> 
+> !AL
+>    call outfld ('NNUCCCO  ', nnuccco,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NNUCCTO  ', nnuccto,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPSACWSO ', npsacwso,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NSUBCO   ', nsubco,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPRAO    ', nprao,       psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPRC1O   ', nprc1o,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NQCSEDTEN', nqcsedten,   psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NQISEDTEN', nqisedten,   psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NMELTO   ', nmelto,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NIMELTO  ', nimelto,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NHOMOO   ', nhomoo,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NIHOMOO  ', nihomoo,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NSACWIO  ', nsacwio,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NSUBIO   ', nsubio,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPRCIO   ', nprcio,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPRAIO   ', npraio,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NNUDEPO  ', nnudepo,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPCCNO   ', npccno,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NPCCNO2  ', npccn,       psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NNUCCDO  ', nnuccdo,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('MNUDEPO  ', mnudepo,     psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NCTNCONS ', nctncons,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NCTNNBMN ', nctnnbmn,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NCTNSZMN ', nctnszmn,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NCTNSZMX ', nctnszmx,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NCTNNCLD ', nctnncld,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NITNCONS ', nitncons,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NITNSZMN ', nitnszmn,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NITNSZMX ', nitnszmx,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld ('NITNNCLD ', nitnncld,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    if (micro_mg_version > 1) then
+>       call outfld ('FRZR   ', frzr,       psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>       call outfld ('NFRZR  ', nfrzr,      psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>       call outfld ('MNUCCRI', mnuccri,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>       call outfld ('NNUCCRI', nnuccri,    psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    end if
+> 
+>    call outfld( 'MPDNLIQ  ', ncten,       psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+>    call outfld( 'MPDNICE  ', niten,       psetcols, lchnk, avg_subcol_field=use_subcol_microp )
+> !AL
+> 
