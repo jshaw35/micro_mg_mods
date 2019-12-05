@@ -29,6 +29,9 @@ use cam_abortutils, only: endrun
 use hetfrz_classnuc,   only: hetfrz_classnuc_init, hetfrz_classnuc_calc
 use oslo_utils, only: CalculateNumberConcentration, calculateNumberMedianRadius
 use aerosoldef, only : MODE_IDX_DST_A2, MODE_IDX_DST_A3, MODE_IDX_OMBC_INTMIX_COAT_AIT
+
+use phys_grid,      only: get_rlat_all_p  !jks 061119, this function will return an array with column latitudes
+
 implicit none
 private
 save
@@ -435,6 +438,11 @@ subroutine hetfrz_classnuc_oslo_calc( &
    real(r8) :: na500(pcols,pver)
    real(r8) :: tot_na500(pcols,pver)
 
+   ! perhaps need to declare rlats object  ! jks
+   real(r8), allocatable :: rlats(:)  ! jks, define as an allocatable because the size ncol is not defined yet
+   real(r8)              :: inp_mult  ! jks I think that we just need a single float to do the job here
+   real(r8)              :: inp_tag   ! jks I think that we just need a single float to do the job here
+
    character(128) :: errstring   ! Error status
 
    integer :: n, m, kk 
@@ -448,6 +456,9 @@ subroutine hetfrz_classnuc_oslo_calc( &
       nc    => state%q(:pcols,:pver,numliq_idx), &
       pmid  => state%pmid               )
 
+   call get_rlat_all_p(lchnk, ncol, rlats) ! jks 191104, get rlats array
+   inp_tag = 1._r8 ! jks 191104 this string is to be picked out and replaced with a [0,1] r8
+   
    itim_old = pbuf_old_tim_idx()
    call pbuf_get_field(pbuf, ast_idx, ast, start=(/1,1,itim_old/), kount=(/pcols,pver,1/))
 
@@ -500,6 +511,14 @@ subroutine hetfrz_classnuc_oslo_calc( &
 
    ! output aerosols as reference information for heterogeneous freezing
    do i = 1, ncol
+      ! jks calculate whether the latitude is high enough here? It is the first iteration over ncol
+      ! Arctic specific modification of the dust nuclei number ! jks 061119
+      if (rlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) then
+         inp_mult = inp_tag
+      else
+         inp_mult = 1.0_r8
+      end if
+
       do k = top_lev, pver
          call get_aer_num(numberConcentration(i,k,:), CloudnumberConcentration(i,k,:), rho(i,k),         &    
                      !++ MH_2015/04/10
@@ -508,7 +527,7 @@ subroutine hetfrz_classnuc_oslo_calc( &
                      total_aer_num(i,k,:), coated_aer_num(i,k,:), uncoated_aer_num(i,k,:),  &
                      total_interstitial_aer_num(i,k,:), total_cloudborne_aer_num(i,k,:),    &    
                      hetraer(i,k,:), awcam(i,k,:), awfacm(i,k,:), dstcoat(i,k,:),           &    
-                     na500(i,k), tot_na500(i,k))
+                     na500(i,k), tot_na500(i,k), inp_mult) ! jks 061119 pass inp multiplier
 
          fn_cloudborne_aer_num(i,k,1) = total_aer_num(i,k,1)*factnum(i,k,MODE_IDX_OMBC_INTMIX_COAT_AIT)  ! bc
          fn_cloudborne_aer_num(i,k,2) = total_aer_num(i,k,2)*factnum(i,k,MODE_IDX_DST_A2) 
@@ -729,8 +748,9 @@ subroutine get_aer_num(qaerpt, qaercwpt, rhoair,           &   ! input
                        total_interstial_aer_num,           &
                        total_cloudborne_aer_num,           &
                        hetraer, awcam, awfacm, dstcoat,    &
+                       na500, tot_na500, inp_mult) ! jks 061119
+
 !++ wy4.0
-                       na500, tot_na500)
 !-- wy4.0
 
     use spmd_utils, only: iam
@@ -758,6 +778,8 @@ subroutine get_aer_num(qaerpt, qaercwpt, rhoair,           &   ! input
     real(r8), intent(in) :: volumeCore(nmodes_oslo)
     real(r8) :: sigmag_amode(3)
     
+    real(r8), intent(in) :: inp_mult                 ! aerosol particle multiplier jks 061119
+   
     
     ! output
     real(r8), intent(out) :: total_aer_num(3)            ! #/cm^3
@@ -901,14 +923,14 @@ subroutine get_aer_num(qaerpt, qaercwpt, rhoair,           &   ! input
 !                prepare output
 !*****************************************************************************
 
-    total_interstial_aer_num(1) = bc_num 
-    total_interstial_aer_num(2) = dst1_num 
-    total_interstial_aer_num(3) = dst3_num 
-
-    total_cloudborne_aer_num(1) = bc_num_imm 
-    total_cloudborne_aer_num(2) = dst1_num_imm 
-    total_cloudborne_aer_num(3) = dst3_num_imm
-  
+    total_interstial_aer_num(1) = bc_num * inp_mult ! jks adjust all aerosol numbers
+    total_interstial_aer_num(2) = dst1_num * inp_mult ! jks
+    total_interstial_aer_num(3) = dst3_num * inp_mult ! jks
+ 
+    total_cloudborne_aer_num(1) = bc_num_imm * inp_mult ! jks
+    total_cloudborne_aer_num(2) = dst1_num_imm * inp_mult ! jks
+    total_cloudborne_aer_num(3) = dst3_num_imm * inp_mult ! jks
+   
     do i = 1, 3
         total_aer_num(i) = total_interstial_aer_num(i)+total_cloudborne_aer_num(i)
         coated_aer_num(i) = total_interstial_aer_num(i)*dstcoat(i)
