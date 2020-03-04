@@ -1,0 +1,149 @@
+1c1
+< netcdf cont_test10.cam.rh0.0001-01-11-00000 {
+---
+> netcdf newnoresm_precip3.cam.rh0.0001-01-06-00000 {
+4d3
+< 	lon = 144 ;
+6a6
+> 	lon = 144 ;
+10a11,12
+> 	isotherms_mpc = 9 ;
+> 	slfbins = 11 ;
+12c14
+< 	num_mdims = 2 ;
+---
+> 	num_mdims = 4 ;
+18,24d19
+< 	double lon(lon) ;
+< 		lon:_FillValue = -900. ;
+< 		lon:long_name = "longitude" ;
+< 		lon:units = "degrees_east" ;
+< 	double gw(lat) ;
+< 		gw:_FillValue = -900. ;
+< 		gw:long_name = "latitude weights" ;
+32a28,34
+> 	double gw(lat) ;
+> 		gw:_FillValue = -900. ;
+> 		gw:long_name = "latitude weights" ;
+> 	double lon(lon) ;
+> 		lon:_FillValue = -900. ;
+> 		lon:long_name = "longitude" ;
+> 		lon:units = "degrees_east" ;
+321a324,343
+> 	double BERGOXCLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		BERGOXCLD_ISOTM:mdims = 3 ;
+> 		BERGOXCLD_ISOTM:long_name = "Mean BERGO near isotherm * CLD_ISOTM (discard below thick cloud)" ;
+> 		BERGOXCLD_ISOTM:cell_methods = "time: mean" ;
+> 	int BERGOXCLD_ISOTM_nacs ;
+> 	double BERGOXCLD_ISOTM_NONSIM(isotherms_mpc, lat, lon) ;
+> 		BERGOXCLD_ISOTM_NONSIM:mdims = 3 ;
+> 		BERGOXCLD_ISOTM_NONSIM:long_name = "Mean BERGO near isotherm * CLD_ISOTM_NONSIM" ;
+> 		BERGOXCLD_ISOTM_NONSIM:cell_methods = "time: mean" ;
+> 	int BERGOXCLD_ISOTM_NONSIM_nacs ;
+> 	double BERGSOXCLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		BERGSOXCLD_ISOTM:mdims = 3 ;
+> 		BERGSOXCLD_ISOTM:long_name = "Mean BERGSO near isotherm * CLD_ISOTM (discard below thick cloud)" ;
+> 		BERGSOXCLD_ISOTM:cell_methods = "time: mean" ;
+> 	int BERGSOXCLD_ISOTM_nacs ;
+> 	double BERGSOXCLD_ISOTM_NONSIM(isotherms_mpc, lat, lon) ;
+> 		BERGSOXCLD_ISOTM_NONSIM:mdims = 3 ;
+> 		BERGSOXCLD_ISOTM_NONSIM:long_name = "Mean BERGSO near isotherm * CLD_ISOTM_NONSIM" ;
+> 		BERGSOXCLD_ISOTM_NONSIM:cell_methods = "time: mean" ;
+> 	int BERGSOXCLD_ISOTM_NONSIM_nacs ;
+379a402,406
+> 	double CLDTAU(lev, lat, lon) ;
+> 		CLDTAU:mdims = 1 ;
+> 		CLDTAU:long_name = "Cloud optical thickness" ;
+> 		CLDTAU:cell_methods = "time: mean" ;
+> 	int CLDTAU_nacs ;
+384a412,441
+> 	double CLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		CLD_ISOTM:mdims = 3 ;
+> 		CLD_ISOTM:long_name = "Total cloud fraction near isotherm (discard below thick cloud)" ;
+> 		CLD_ISOTM:cell_methods = "time: mean" ;
+> 	int CLD_ISOTM_nacs ;
+> 	double CLD_ISOTM_NONSIM(isotherms_mpc, lat, lon) ;
+> 		CLD_ISOTM_NONSIM:mdims = 3 ;
+> 		CLD_ISOTM_NONSIM:long_name = "Total cloud fraction near isotherm" ;
+> 		CLD_ISOTM_NONSIM:cell_methods = "time: mean" ;
+> 	int CLD_ISOTM_NONSIM_nacs ;
+> 	double CLD_ISOTM_SLF(slfbins, isotherms_mpc, lat, lon) ;
+> 		CLD_ISOTM_SLF:mdims = 3, 4 ;
+> 		CLD_ISOTM_SLF:long_name = "Total cloud fraction in SLF bin near isotherm (discard below thick cloud)" ;
+> 		CLD_ISOTM_SLF:cell_methods = "time: mean" ;
+> 	int CLD_ISOTM_SLF_nacs ;
+> 	double CLD_ISOTM_SLF_NONSIM(slfbins, isotherms_mpc, lat, lon) ;
+> 		CLD_ISOTM_SLF_NONSIM:mdims = 3, 4 ;
+> 		CLD_ISOTM_SLF_NONSIM:long_name = "Total cloud fraction in SLF bin near isotherm" ;
+> 		CLD_ISOTM_SLF_NONSIM:cell_methods = "time: mean" ;
+> 	int CLD_ISOTM_SLF_NONSIM_nacs ;
+> 	double CLD_SLF(slfbins, lat, lon) ;
+> 		CLD_SLF:mdims = 4 ;
+> 		CLD_SLF:long_name = "Total cloud fraction in SLF bin (discard below thick cloud)" ;
+> 		CLD_SLF:cell_methods = "time: mean" ;
+> 	int CLD_SLF_nacs ;
+> 	double CLD_SLF_NONSIM(slfbins, lat, lon) ;
+> 		CLD_SLF_NONSIM:mdims = 4 ;
+> 		CLD_SLF_NONSIM:long_name = "Total cloud fraction in SLF bin" ;
+> 		CLD_SLF_NONSIM:cell_methods = "time: mean" ;
+> 	int CLD_SLF_NONSIM_nacs ;
+408a466,475
+> 	double CT_CLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		CT_CLD_ISOTM:mdims = 3 ;
+> 		CT_CLD_ISOTM:long_name = "Total cloudtop cloud fraction near isotherm (discard below thick cloud)" ;
+> 		CT_CLD_ISOTM:cell_methods = "time: mean" ;
+> 	int CT_CLD_ISOTM_nacs ;
+> 	double CT_SLFXCLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		CT_SLFXCLD_ISOTM:mdims = 3 ;
+> 		CT_SLFXCLD_ISOTM:long_name = "Mean cloudtop supercooled liquid fraction near isotherm * CLD_ISOTM (discard below thick cloud)" ;
+> 		CT_SLFXCLD_ISOTM:cell_methods = "time: mean" ;
+> 	int CT_SLFXCLD_ISOTM_nacs ;
+772a840,851
+> 	double MG_SADICE(lev, lat, lon) ;
+> 		MG_SADICE:mdims = 1 ;
+> 		MG_SADICE:units = "cm2/cm3" ;
+> 		MG_SADICE:long_name = "MG surface area density ice" ;
+> 		MG_SADICE:cell_methods = "time: mean" ;
+> 	int MG_SADICE_nacs ;
+> 	double MG_SADLIQ(lev, lat, lon) ;
+> 		MG_SADLIQ:mdims = 1 ;
+> 		MG_SADLIQ:units = "cm2/cm3" ;
+> 		MG_SADLIQ:long_name = "MG surface area density liq" ;
+> 		MG_SADLIQ:cell_methods = "time: mean" ;
+> 	int MG_SADLIQ_nacs ;
+1056a1136,1155
+> 	double SADICEXCLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		SADICEXCLD_ISOTM:mdims = 3 ;
+> 		SADICEXCLD_ISOTM:long_name = "Mean ice surface area density near isotherm * CLD_ISOTM (discard below thick cloud)" ;
+> 		SADICEXCLD_ISOTM:cell_methods = "time: mean" ;
+> 	int SADICEXCLD_ISOTM_nacs ;
+> 	double SADICEXCLD_ISOTM_NONSIM(isotherms_mpc, lat, lon) ;
+> 		SADICEXCLD_ISOTM_NONSIM:mdims = 3 ;
+> 		SADICEXCLD_ISOTM_NONSIM:long_name = "Mean ice surface area density near isotherm * CLD_ISOTM_NONSIM" ;
+> 		SADICEXCLD_ISOTM_NONSIM:cell_methods = "time: mean" ;
+> 	int SADICEXCLD_ISOTM_NONSIM_nacs ;
+> 	double SADLIQXCLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		SADLIQXCLD_ISOTM:mdims = 3 ;
+> 		SADLIQXCLD_ISOTM:long_name = "Mean droplet surface area density near isotherm * CLD_ISOTM (discard below thick cloud)" ;
+> 		SADLIQXCLD_ISOTM:cell_methods = "time: mean" ;
+> 	int SADLIQXCLD_ISOTM_nacs ;
+> 	double SADLIQXCLD_ISOTM_NONSIM(isotherms_mpc, lat, lon) ;
+> 		SADLIQXCLD_ISOTM_NONSIM:mdims = 3 ;
+> 		SADLIQXCLD_ISOTM_NONSIM:long_name = "Mean droplet surface area density near isotherm * CLD_ISOTM_NONSIM" ;
+> 		SADLIQXCLD_ISOTM_NONSIM:cell_methods = "time: mean" ;
+> 	int SADLIQXCLD_ISOTM_NONSIM_nacs ;
+1212a1312,1321
+> 	double SLFXCLD_ISOTM(isotherms_mpc, lat, lon) ;
+> 		SLFXCLD_ISOTM:mdims = 3 ;
+> 		SLFXCLD_ISOTM:long_name = "Mean supercooled liquid fraction near isotherm * CLD_ISOTM (discard below thick cloud)" ;
+> 		SLFXCLD_ISOTM:cell_methods = "time: mean" ;
+> 	int SLFXCLD_ISOTM_nacs ;
+> 	double SLFXCLD_ISOTM_NONSIM(isotherms_mpc, lat, lon) ;
+> 		SLFXCLD_ISOTM_NONSIM:mdims = 3 ;
+> 		SLFXCLD_ISOTM_NONSIM:long_name = "Mean supercooled liquid fraction near isotherm * CLD_ISOTM_NONSIM" ;
+> 		SLFXCLD_ISOTM_NONSIM:cell_methods = "time: mean" ;
+> 	int SLFXCLD_ISOTM_NONSIM_nacs ;
+2190c2299
+< 		:case = "cont_test10" ;
+---
+> 		:case = "newnoresm_precip3" ;

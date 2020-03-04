@@ -802,7 +802,10 @@ subroutine micro_mg_cam_init(pbuf2d)
                             .9_r8,   .99_r8,   .999_r8,   .9999_r8,        1._r8-1.e-30_r8 /)
    slfbins_bounds(2,:) = (/ 1.e-30_r8, .0001_r8,  .001_r8,   .01_r8,   .1_r8, .9_r8,   &
                             .99_r8,  .999_r8,  .9999_r8,  1._r8-1.e-30_r8, 1._r8 /)
-
+   
+   call add_hist_coord('slfbins', nslfbins, 'supercooled liquid fraction bins',  &
+            'C', slfbins_midpoints, bounds_name='slfbins_bounds', bounds=slfbins_bounds)
+            
    ! Define new variables
 
    call addfld ('SLFXCLD_ISOTM',        (/'isotherms_mpc'/), 'A', ' ', 'Mean supercooled liquid fraction near isotherm * CLD_ISOTM (discard below thick cloud)' )
