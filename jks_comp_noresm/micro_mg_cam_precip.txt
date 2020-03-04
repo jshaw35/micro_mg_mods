@@ -1,0 +1,121 @@
+5c5
+< !  CAM Interfaces for MG microphysics
+---
+> !  CAM Interfaces for MG microphysics, jshaw testing
+152,155d151
+< 
+< integer, parameter :: nprecipbins = 32
+< real(r8), target :: precipbins_midpoints(nprecipbins)
+< real(r8), target :: precipbins_bounds(2,nprecipbins)
+251,252d246
+<    prec_dp_idx = -1,        & !zsm, jks
+<    prec_sh_idx = -1,        & !zsm, jks
+684,685c678,679
+<    integer :: t, s, pr             ! loop through bins of temperature, slf,
+<                                    ! and precip  !zsm, jks
+---
+>    integer :: t, s             ! loop through bins of temperature, slf,
+>                                    !   !zsm, jks
+812,830d805
+<    call add_hist_coord('slfbins', nslfbins, 'supercooled liquid fraction bins',  &
+<            'C', slfbins_midpoints, bounds_name='slfbins_bounds', bounds=slfbins_bounds)
+< 
+<    precipbins_bounds(1,1) = 0._r8
+<    precipbins_bounds(2,1) = 1.e-3_r8
+<    precipbins_midpoints(1) = 5.e-4_r8
+<    do pr=2,nprecipbins
+<       precipbins_bounds(1,pr)= precipbins_bounds(2,pr-1)
+<       if (pr.ne.nprecipbins) then
+<          precipbins_bounds(2,pr)=precipbins_bounds(1,pr) * 10._r8**(5._r8/(nprecipbins-2._r8))
+<       else
+<          precipbins_bounds(2,pr)=precipbins_bounds(1,pr)*1.e10_r8
+<       end if
+<       precipbins_midpoints(pr)=(precipbins_bounds(1,pr)+precipbins_bounds(2,pr))/2._r8
+<    end do
+< 
+<    call add_hist_coord('precipbins', nprecipbins, 'precipitation rate bins', &
+<            'C', precipbins_midpoints, bounds_name='precipbins_bounds', bounds=precipbins_bounds)
+< 
+856,863d830
+<    call addfld ('PRECIPBINOCC_CC',  (/'precipbins'/), 'A', ' ', 'Occurrence of convective precip bin'  )
+<    call addfld ('PRECIPBINOCC_CL',  (/'precipbins'/), 'A', ' ', 'Occurrence of stratiform precip bin'  )
+<    call addfld ('PRECIPBINOCC_CT',  (/'precipbins'/), 'A', ' ', 'Occurrence of total precip bin'       )
+<    call addfld ('PRECIPBINRATE_CC', (/'precipbins'/), 'A', ' ', 'Precip rate in convective precip bin' )
+<    call addfld ('PRECIPBINRATE_CL', (/'precipbins'/), 'A', ' ', 'Precip rate in stratiform precip bin' )
+<    call addfld ('PRECIPBINRATE_CT', (/'precipbins'/), 'A', ' ', 'Precip rate in total precip bin'      )
+< 
+< 
+1251,1257d1217
+<    call add_default ('PRECIPBINOCC_CC          ',1,' ')
+<    call add_default ('PRECIPBINOCC_CL          ',1,' ')
+<    call add_default ('PRECIPBINOCC_CT          ',1,' ')
+<    call add_default ('PRECIPBINRATE_CC         ',1,' ')
+<    call add_default ('PRECIPBINRATE_CL         ',1,' ')
+<    call add_default ('PRECIPBINRATE_CT         ',1,' ')
+< 
+1278,1279d1237
+<    prec_dp_idx  = pbuf_get_index('PREC_DP') !zsm
+<    prec_sh_idx  = pbuf_get_index('PREC_SH') !zsm
+1403c1361
+<    integer :: t, s, pr                 !zsm, jks
+---
+>    integer :: t, s                 !zsm, jks
+1420,1423d1377
+<    real(r8), pointer :: prec_dp(:)           ! total precipitation from ZM convection !zsm, jks
+<    real(r8), pointer :: prec_sh(:)           ! total precipitation from Hack convection !zsm, jks
+<    real(r8):: precc(pcols)                   ! convective precip rate !zsm, jks
+<    real(r8):: precl(pcols)                   ! stratiform precip rate !zsm, jks
+1464,1470d1417
+<    real(r8) :: precipbinocc_cc(pcols,nprecipbins)
+<    real(r8) :: precipbinocc_cl(pcols,nprecipbins)
+<    real(r8) :: precipbinocc_ct(pcols,nprecipbins)
+<    real(r8) :: precipbinrate_cc(pcols,nprecipbins)
+<    real(r8) :: precipbinrate_cl(pcols,nprecipbins)
+<    real(r8) :: precipbinrate_ct(pcols,nprecipbins)
+< 
+1472d1418
+<    real(r8) :: wgt
+2106,2107d2051
+<    call pbuf_get_field(pbuf, prec_dp_idx,     prec_dp,     col_type=col_type) !zsm, jks
+<    call pbuf_get_field(pbuf, prec_sh_idx,     prec_sh,     col_type=col_type) !zsm, jks
+2161,2162d2104
+<       call pbuf_get_field(pbuf, prec_dp_idx,     prec_dp) !zsm, jks
+<       call pbuf_get_field(pbuf, prec_sh_idx,     prec_sh) !zsm, jks
+2728,2730d2669
+<    precc(:ncol)    = prec_dp(:ncol)  + prec_sh(:ncol) !zsm
+<    precl(:ncol)    = prec_sed(:ncol) + prec_pcw(:ncol) !zsm
+< 
+3369,3374d3307
+<    precipbinocc_cl                   = 0._r8 
+<    precipbinocc_cc                   = 0._r8 
+<    precipbinocc_ct                   = 0._r8 
+<    precipbinrate_cl                  = 0._r8
+<    precipbinrate_cc                  = 0._r8
+<    precipbinrate_ct                  = 0._r8
+3479,3496d3411
+<    do i=1,ncol
+<       do pr=1,nprecipbins
+<          if ((precc(i)*3.6e6_r8.ge.precipbins_bounds(1,pr)).and.(precc(i)*3.6e6_r8.lt.precipbins_bounds(2,pr))) then
+<             precipbinocc_cc(i,pr)  = precipbinocc_cc(i,pr) + 1.0_r8
+<             precipbinrate_cc(i,pr)  = precipbinrate_cc(i,pr) + precc(i)*3.6e6_r8
+<          end if
+< 
+<          if ((precl(i)*3.6e6_r8.ge.precipbins_bounds(1,pr)).and.(precl(i)*3.6e6_r8.lt.precipbins_bounds(2,pr))) then
+<             precipbinocc_cl(i,pr)  = precipbinocc_cl(i,pr) + 1.0_r8
+<             precipbinrate_cl(i,pr)  = precipbinrate_cl(i,pr) + precl(i)*3.6e6_r8
+<          end if
+< 
+<          if (((precc(i)+precl(i))*3.6e6_r8.ge.precipbins_bounds(1,pr)).and.((precc(i)+precl(i))*3.6e6_r8.lt.precipbins_bounds(2,pr))) then
+<             precipbinocc_ct(i,pr)  = precipbinocc_ct(i,pr) + 1.0_r8
+<             precipbinrate_ct(i,pr)  = precipbinrate_ct(i,pr) + (precc(i)+precl(i))*3.6e6_r8
+<          end if
+<       end do
+<    end do ! i loop
+3632,3638d3546
+< 
+<    call outfld('PRECIPBINOCC_CC',               precipbinocc_cc,    pcols,lchnk)
+<    call outfld('PRECIPBINOCC_CL',               precipbinocc_cl,    pcols,lchnk)
+<    call outfld('PRECIPBINOCC_CT',               precipbinocc_ct,    pcols,lchnk)
+<    call outfld('PRECIPBINRATE_CC',              precipbinrate_cc,   pcols,lchnk)
+<    call outfld('PRECIPBINRATE_CL',              precipbinrate_cl,   pcols,lchnk)
+<    call outfld('PRECIPBINRATE_CT',              precipbinrate_ct,   pcols,lchnk)
