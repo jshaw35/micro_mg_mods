@@ -1,0 +1,102 @@
+135a136,137
+> use phys_grid,        only: get_rlat_all_p  !zsm, jks
+> 
+355a358
+>      mgrlats,                                                    & ! zsm, jks 111119
+373c376
+<      sadice,                       sadsnow,                      &
+---
+>      sadice, sadliq,               sadsnow,                      & !zsm, jks
+460a464
+>   real(r8), intent(in) :: mgrlats(mgncol)! latitude (rad) ! zsm, jks 111119 
+515a520
+>   real(r8), intent(out) :: sadliq(mgncol,nlev)       ! cloud liquid surface area density (cm2/cm3) !zsm, jks
+877a883,885
+>   real(r8) :: wbfeffmult(mgncol,nlev) ! wbf efficiency multiplier !zsm, jks
+>   real(r8) :: wbf_tag                 ! Arctic WBF multiplier value   !jks 
+> 
+1085a1094,1096
+>   wbfeffmult = 1._r8 !zsm, jks
+>   wbf_tag = 1._r8    !jks this line is to be modified with a bash script
+> 
+1135a1147
+>   sadliq = 0._r8 !zsm, jks
+1165a1178
+> 
+1185a1199
+>    !   ncai = (naai*icenucmult)*rho      ! jks
+1207a1222
+>       !   nnuccd = ((naai*icenucmult)-ni/icldm)/mtime*icldm ! jks scaled INPs
+1209c1224,1225
+<         nimax = naai*icldm
+---
+>         nimax = naai*icldm 
+>       !   nimax = (naai*icenucmult)*icldm ! jks scale INPs
+1371a1388,1393
+>      ! Modify WBF efficiency if in arctic !zsm !191004 jks added unique tag for wbf
+>      do i=1,mgncol
+>         if (mgrlats(i)*180._r8/3.14159_r8.gt.+66.66667_r8) then 
+>            wbfeffmult(i,k) = wbf_tag
+>         end if
+>      end do
+1575a1598,1600
+>         where (nsacwi(:,k)*deltat.gt.1.e6_r8) ! jks limit ni contributions from secondary ice processes to 1000 (1/m3/s)
+>            nsacwi(:,k) = 1.e6_r8/deltat !
+>         end where
+1616c1641
+<      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor
+---
+>      bergs(:,k)=bergs(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm, jks 111119
+1625c1650
+<         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor
+---
+>         berg(:,k)=berg(:,k)*micro_mg_berg_eff_factor*wbfeffmult(:,k) !zsm, jks 111119
+1732a1758
+>         ! Zachary thinks this is causing problems zsm, jks
+1735a1762
+>          !   if (lamr(i,k) > qsmall .and. 1._r8/lamr(i,k) < Dcs .and. t(i,k).gt.235.15_r8) then ! jks
+2085,2087c2112,2118
+<         if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax(i,k)) then
+<           nitncons(i,k) = nitncons(i,k) + nitend(i,k)-max(0._r8,(nimax(i,k)-ni(i,k))/deltat) !AL
+<            nitend(i,k)=max(0._r8,(nimax(i,k)-ni(i,k))/deltat)
+---
+>         ! jks added temperatre dependence on the nimax limiting process to avoid unphysical responses in mixed-phase clouds
+>       !  if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax(i,k)) then
+>         if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax(i,k).and.t(i,k).lt.235.15_r8) then
+>            if (mgrlats(i)*180._r8/3.14159_r8.lt.+66.66667_r8) then ! jks only ignore NIMAX in the Arctic
+>               nitncons(i,k) = nitncons(i,k) + nitend(i,k)-max(0._r8,(nimax(i,k)-ni(i,k))/deltat) !AL
+>               nitend(i,k)=max(0._r8,(nimax(i,k)-ni(i,k))/deltat)
+>            end if 
+2365a2397,2400
+>         ! jks trying to quickly remove ice sedimentation
+>       !  falouti = 0._r8 
+>       !  faloutni = 0._r8
+> 
+2989a3025,3026
+>            sadliq(i,k) = dumnc(i,k)/gamma(pgam(i,k)+1._r8)*pi*gamma(pgam(i,k)+3._r8)/(4._r8*lamc(i,k)**2._r8) !zsm, jks
+> 
+3013a3051
+>            sadliq(i,k)=0._r8 !zsm, jks
+3275,3276c3313,3315
+< pure subroutine micro_mg_get_cols(ncol, nlev, top_lev, qcn, qin, &
+<      qrn, qsn, mgncol, mgcols)
+---
+> subroutine micro_mg_get_cols(lchnk, ncol, nlev, top_lev, qcn, qin, & ! zsm, jks
+>      qrn, qsn, mgncol, mgcols, mgrlats) !jks
+> ! jks 111119, added lchnk as input and mgrlats as output, may revisit later
+3280a3320
+>   integer, intent(in) :: lchnk     ! zsm, jks 111119
+3291a3332
+>   real(r8), allocatable, intent(out) :: mgrlats(:) ! latitude (rad) for mgcols ! jks 111119
+3295a3337,3338
+>   real(r8) :: rlats(ncol) ! degrees in radians for all columns in chunk !zsm, jks
+> 
+3298a3342
+>   if (allocated(mgrlats)) deallocate(mgrlats) !zsm, jks
+3301a3346,3347
+>   call get_rlat_all_p(lchnk, ncol, rlats) !get latitudes for all cols !zsm, jks
+> 
+3314a3361
+>   allocate(mgrlats(mgncol)) !zsm, jks
+3319a3367
+>         mgrlats(i) = rlats(ii) !zsm, jks also save latitude
