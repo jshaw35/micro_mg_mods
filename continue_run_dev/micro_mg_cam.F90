@@ -170,7 +170,7 @@ integer :: &
    wsedl_idx,          &
    rei_idx,            &
    sadice_idx,         &
-   sadliq_idx,         & !zsm, jks, crit
+!   sadliq_idx,         & !zsm, jks, crit assuming sadice_idx is the same
    sadsnow_idx,        &
    rel_idx,            &
    dei_idx,            &
@@ -463,7 +463,7 @@ subroutine micro_mg_cam_register
 
    call pbuf_add_field('REI',        'physpkg',dtype_r8,(/pcols,pver/), rei_idx)
    call pbuf_add_field('SADICE',     'physpkg',dtype_r8,(/pcols,pver/), sadice_idx)
-   call pbuf_add_field('SADLIQ',     'physpkg',dtype_r8,(/pcols,pver/), sadliq_idx) !zsm, jks, crit
+!   call pbuf_add_field('SADLIQ',     'physpkg',dtype_r8,(/pcols,pver/), sadliq_idx) !zsm, jks, crit using sadice instead
    call pbuf_add_field('SADSNOW',    'physpkg',dtype_r8,(/pcols,pver/), sadsnow_idx)
    call pbuf_add_field('REL',        'physpkg',dtype_r8,(/pcols,pver/), rel_idx)
 
@@ -542,7 +542,7 @@ subroutine micro_mg_cam_register
 
       call pbuf_register_subcol('REI',         'micro_mg_cam_register', rei_idx)
       call pbuf_register_subcol('SADICE',      'micro_mg_cam_register', sadice_idx)
-      call pbuf_register_subcol('SADLIQ',      'micro_mg_cam_register', sadliq_idx) !zsm, jks crit
+!      call pbuf_register_subcol('SADLIQ',      'micro_mg_cam_register', sadliq_idx) !zsm, jks crit, using sadice instead
       call pbuf_register_subcol('SADSNOW',     'micro_mg_cam_register', sadsnow_idx)
       call pbuf_register_subcol('REL',         'micro_mg_cam_register', rel_idx)
 
@@ -1672,7 +1672,7 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    real(r8), target :: packed_rel(mgncol,nlev)
    real(r8), target :: packed_rei(mgncol,nlev)
    real(r8), target :: packed_sadice(mgncol,nlev)
-   real(r8), target :: packed_sadliq(mgncol,nlev) !zsm, jks, crit
+   real(r8), target :: packed_sadliq(mgncol,nlev) !zsm, jks, crit output from micro_mg_tend (only mg columns)
    real(r8), target :: packed_sadsnow(mgncol,nlev)
    real(r8), target :: packed_lambdac(mgncol,nlev)
    real(r8), target :: packed_mu(mgncol,nlev)
@@ -1772,7 +1772,7 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    real(r8), pointer :: rel(:,:)          ! Liquid effective drop radius (microns)
    real(r8), pointer :: rei(:,:)          ! Ice effective drop size (microns)
    real(r8), pointer :: sadice(:,:)       ! Ice surface area density (cm2/cm3)
-   real(r8), pointer :: sadliq(:,:)       ! Ice surface area density (cm2/cm3) !zsm, jks, crit
+   real(r8), pointer :: sadliq(:,:)       ! Ice surface area density (cm2/cm3) !zsm, jks, crit, keeping but unsure
    real(r8), pointer :: sadsnow(:,:)      ! Snow surface area density (cm2/cm3)
 
 
@@ -1864,7 +1864,7 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    real(r8), pointer :: rel_grid(:,:)
    real(r8), pointer :: rei_grid(:,:)
    real(r8), pointer :: sadice_grid(:,:)
-   real(r8), pointer :: sadliq_grid(:,:) !zsm
+   real(r8), pointer :: sadliq_grid(:,:) !zsm, jks crit keep this. pointer for unpacked data
    real(r8), pointer :: sadsnow_grid(:,:)
    real(r8), pointer :: dei_grid(:,:)
    real(r8), pointer :: des_grid(:,:)
@@ -2047,8 +2047,9 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    call pbuf_get_field(pbuf, icswp_idx,       icswp,       col_type=col_type)
    call pbuf_get_field(pbuf, rel_idx,         rel,         col_type=col_type)
    call pbuf_get_field(pbuf, rei_idx,         rei,         col_type=col_type)
+   ! call pbuf_get_field(pbuf, sadliq_idx,      sadliq,      col_type=col_type) !zsm, jks, old line
+   call pbuf_get_field(pbuf, sadice_idx,      sadliq,      col_type=col_type) !zsm, jks, assume same shape from sadice array, assign to sadliq
    call pbuf_get_field(pbuf, sadice_idx,      sadice,      col_type=col_type)
-   call pbuf_get_field(pbuf, sadliq_idx,      sadliq,      col_type=col_type) !zsm, jks, crit this can't be data, just a grid? could I use another index_var?
    call pbuf_get_field(pbuf, sadsnow_idx,     sadsnow,     col_type=col_type)
    call pbuf_get_field(pbuf, wsedl_idx,       wsedl,       col_type=col_type)
    call pbuf_get_field(pbuf, qme_idx,         qme,         col_type=col_type)
@@ -2100,8 +2101,9 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
       call pbuf_get_field(pbuf, icswp_idx,       icswp_grid)
       call pbuf_get_field(pbuf, rel_idx,         rel_grid)
       call pbuf_get_field(pbuf, rei_idx,         rei_grid)
+      ! call pbuf_get_field(pbuf, sadliq_idx,      sadliq_grid) !zsm, jks crit old line
+      call pbuf_get_field(pbuf, sadice_idx,      sadliq_grid) !zsm, jks crit. Create unpacked pointer from sadice structure.
       call pbuf_get_field(pbuf, sadice_idx,      sadice_grid)
-      call pbuf_get_field(pbuf, sadliq_idx,      sadliq_grid) !zsm, jks crit
       call pbuf_get_field(pbuf, sadsnow_idx,     sadsnow_grid)
       call pbuf_get_field(pbuf, wsedl_idx,       wsedl_grid)
       call pbuf_get_field(pbuf, qme_idx,         qme_grid)
@@ -2354,7 +2356,7 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    call post_proc%add_field(p(sadice), p(packed_sadice), &
         accum_method=accum_null)
    call post_proc%add_field(p(sadliq), p(packed_sadliq), &
-        accum_method=accum_null)                            !zsm, jks crit, produces the final array from the packed array
+        accum_method=accum_null)                            !zsm, jks crit, produces the final array from the packed array. Should still work.
    call post_proc%add_field(p(sadsnow), p(packed_sadsnow), &
         accum_method=accum_null)
    call post_proc%add_field(p(lambdac), p(packed_lambdac), &
