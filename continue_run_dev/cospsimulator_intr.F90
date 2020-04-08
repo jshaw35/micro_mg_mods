@@ -612,7 +612,7 @@ CONTAINS
     
     !! if no simulators are turned on at all and docosp is, set cosp_amwg = .true.
     if((docosp) .and. (.not.lradar_sim) .and. (.not.llidar_sim) .and. (.not.lisccp_sim) .and. &
-         (.not.lmisr_sim) .and. (.not.lmodis_sim)) then
+         (.not.lmisr_sim) .and. (.not.lmodis_sim) .and. (.not.slf_isotherms)) then ! jks added slf_isotherms
        cosp_amwg = .true.
     end if
     if (cosp_amwg) then
@@ -652,6 +652,7 @@ CONTAINS
           write(iulog,*)'  Write COSP input fields                  = ', cosp_histfile_aux
           write(iulog,*)'  Write COSP input fields to history file  = ', cosp_histfile_aux_num
           write(iulog,*)'  Write COSP subcolumn fields              = ', cosp_lfrac_out
+          write(iulog,*)'  SLF_isotherms added                      = ', slf_isotherms
        else
           write(iulog,*)'COSP not enabled'
        end if
