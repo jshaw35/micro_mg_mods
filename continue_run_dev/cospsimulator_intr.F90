@@ -79,7 +79,8 @@ module cospsimulator_intr
        nhtml_cosp = pver  ! Mumber of model levels is pver
   integer ::  &
        nscol_cosp,  &     ! Number of subcolumns, use namelist input Ncolumns to set.
-       nht_cosp           ! Number of height for COSP radar and lidar simulator outputs.  
+       nht_cosp,     &     ! Number of height for COSP radar and lidar simulator outputs.  
+       nisotherms_mpc     ! jks number of isotherms            
                           !  *set to 40 if csat_vgrid=.true., else set to Nlr*
   
   ! ######################################################################################
@@ -116,7 +117,9 @@ module cospsimulator_intr
   real(r8),allocatable, public :: htdbze_dbzemid_cosp(:)   ! (nht_cosp*ndbze_cosp)
   real(r8),allocatable, target :: htlim_cosp(:,:)          ! height limits for COSP outputs (nht_cosp+1)
   real(r8),allocatable, target :: htmid_cosp(:)            ! height midpoints of COSP radar/lidar output (nht_cosp)
+  real(r8),allocatable, target :: isotherms_mpc_midpoints(:) ! temp midpoints of cuz cloud phase output (9) jks
   real(r8),allocatable         :: htlim_cosp_1d(:)         ! height limits for COSP outputs (nht_cosp+1)
+  real(r8),allocatable         :: isotherms_mpc_bounds(:,:)  ! temp bounds for cuz outputs (2,9?) jks
   real(r8),allocatable         :: htdbze_htmid_cosp(:)     ! (nht_cosp*ndbze_cosp)
   real(r8),allocatable         :: htsr_htmid_cosp(:)       ! (nht_cosp*nsr_cosp)
   real(r8),allocatable         :: htsr_srmid_cosp(:)       ! (nht_cosp*nsr_cosp)
@@ -348,6 +351,8 @@ CONTAINS
        endif
     endif
     
+    nisotherms_mpc = 9 ! jks
+
     ! Set COSP call frequency, from namelist.
     cosp_nradsteps = cosp_nradsteps_in
     
@@ -361,6 +366,9 @@ CONTAINS
              htsr_htmid_cosp(nht_cosp*nsr_cosp),htsr_srmid_cosp(nht_cosp*nsr_cosp),                             &
              htmlscol_htmlmid_cosp(nhtml_cosp*nscol_cosp),htmlscol_scol_cosp(nhtml_cosp*nscol_cosp))
     
+    ! jks CUZ allocations
+    allocate(isotherms_mpc_midpoints(nisotherms_mpc),isotherms_mpc_bounds(2,nisotherms_mpc))
+
     ! DJS2017: Just pull from cosp_config
     if (use_vgrid_in) then
        htlim_cosp_1d(1)            = vgrid_zu(1)
@@ -395,6 +403,14 @@ CONTAINS
        htmisrtau_cosp(k) = k
     end do
     
+    ! jks assign CUZ midpoint and bound values:
+    do k=1,nisotherms_mpc
+      isotherms_mpc_midpoints(k)=273.15_r8-5._r8*(nisotherms_mpc-k)
+      isotherms_mpc_bounds(1,k)=isotherms_mpc_midpoints(k)-1.0_r8
+      isotherms_mpc_bounds(2,k)=isotherms_mpc_midpoints(k)+1.0_r8
+    end do
+
+
     ! next, assign collapsed reference vectors for cam_history.F90
     ! convention for saving output = prs1,tau1 ... prs1,tau7 ; prs2,tau1 ... prs2,tau7 etc.
     ! actual output is specified in cospsimulator1_intr.F90
@@ -670,6 +686,11 @@ CONTAINS
        call add_hist_coord('cosp_ht', nht_cosp,                                &
             'COSP Mean Height for lidar and radar simulator outputs', 'm',     &
             htmid_cosp, bounds_name='cosp_ht_bnds', bounds=htlim_cosp,         &
+            vertical_coord=.true.)
+       ! jks SLF simulator by isotherm (CUZ)
+       call add_hist_coord('isotherms_mpc', nisotherms_mpc,                                                   &   ! jks cheap hack
+            'mixed-phase cloud isotherms (data within 1.0C)', 'C',                                            &
+            isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds,         &
             vertical_coord=.true.)
     end if
     
