@@ -158,6 +158,7 @@ module cospsimulator_intr
   logical :: cosp_histfile_aux     = .false. ! CAM namelist variable default
   logical :: cosp_lfrac_out        = .false. ! CAM namelist variable default
   logical :: cosp_runall           = .false. ! flag to run all of the cosp simulator package
+  logical :: slf_isotherms         = .false. ! jks adding isos coord bool
   integer :: cosp_ncolumns         = 50      ! CAM namelist variable default
   integer :: cosp_histfile_num     =1        ! CAM namelist variable default, not in COSP namelist 
   integer :: cosp_histfile_aux_num =-1       ! CAM namelist variable default, not in COSP namelist
@@ -470,7 +471,7 @@ CONTAINS
     namelist /cospsimulator_nl/ docosp, cosp_active, cosp_amwg, cosp_atrainorbitdata, cosp_cfmip_3hr, cosp_cfmip_da, &
          cosp_cfmip_mon, cosp_cfmip_off, cosp_histfile_num, cosp_histfile_aux, cosp_histfile_aux_num, cosp_isccp, cosp_lfrac_out, &
          cosp_lite, cosp_lradar_sim, cosp_llidar_sim, cosp_lisccp_sim,  cosp_lmisr_sim, cosp_lmodis_sim, cosp_ncolumns, &
-         cosp_nradsteps, cosp_passive, cosp_sample_atrain, cosp_runall
+         cosp_nradsteps, cosp_passive, cosp_sample_atrain, cosp_runall, slf_isotherms ! jks
     
     !! read in the namelist
     if (masterproc) then
@@ -493,6 +494,7 @@ CONTAINS
     call mpibcast(docosp,               1,  mpilog, 0, mpicom)
     !   call mpibcast(cosp_atrainorbitdata, len(cosp_atrainorbitdata), mpichar, 0, mpicom)
     call mpibcast(cosp_amwg,            1,  mpilog, 0, mpicom)
+    call mpibcast(slf_isotherms,        1,  mpilog, 0, mpicom) ! jks set namelist variable here
     call mpibcast(cosp_lite,            1,  mpilog, 0, mpicom)
     call mpibcast(cosp_passive,         1,  mpilog, 0, mpicom)
     call mpibcast(cosp_active,          1,  mpilog, 0, mpicom)
@@ -687,11 +689,14 @@ CONTAINS
             'COSP Mean Height for lidar and radar simulator outputs', 'm',     &
             htmid_cosp, bounds_name='cosp_ht_bnds', bounds=htlim_cosp,         &
             vertical_coord=.true.)
-       ! jks SLF simulator by isotherm (CUZ)
+    end if
+
+    ! jks adding namelist option
+    if (slf_isotherms) then
        call add_hist_coord('isotherms_mpc', nisotherms_mpc,                                                   &   ! jks cheap hack
-            'mixed-phase cloud isotherms (data within 1.0C)', 'C',                                            &
-            isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds,         &
-            vertical_coord=.true.)
+          'mixed-phase cloud isotherms (data within 1.0C)', 'C',                                            &
+          isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds,         &
+          vertical_coord=.true.)
     end if
     
     if (llidar_sim) then
