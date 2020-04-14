@@ -70,6 +70,12 @@ module cospsimulator_intr
   ! Frequency at which cosp is called, every cosp_nradsteps radiation timestep
   integer, public :: cosp_nradsteps = 1! CAM namelist variable default, not in COSP namelist
   
+  ! jks COSP backpack for slf_isotherms:
+  integer           :: nisotherms_mpc, k
+  real(r8), target  :: isotherms_mpc_midpoints(9) ! temp midpoints of cuz cloud phase output (9)
+  real(r8)         :: isotherms_mpc_bounds(2,9)  ! temp bounds for cuz outputs (2,9)
+  logical           :: slf_isotherms         = .true. ! jks adding isos coord bool
+
 #ifdef USE_COSP
 
   ! ######################################################################################  
@@ -79,8 +85,7 @@ module cospsimulator_intr
        nhtml_cosp = pver  ! Mumber of model levels is pver
   integer ::  &
        nscol_cosp,  &     ! Number of subcolumns, use namelist input Ncolumns to set.
-       nht_cosp,     &     ! Number of height for COSP radar and lidar simulator outputs.  
-       nisotherms_mpc     ! jks number of isotherms            
+       nht_cosp           ! Number of height for COSP radar and lidar simulator outputs.  
                           !  *set to 40 if csat_vgrid=.true., else set to Nlr*
   
   ! ######################################################################################
@@ -117,9 +122,7 @@ module cospsimulator_intr
   real(r8),allocatable, public :: htdbze_dbzemid_cosp(:)   ! (nht_cosp*ndbze_cosp)
   real(r8),allocatable, target :: htlim_cosp(:,:)          ! height limits for COSP outputs (nht_cosp+1)
   real(r8),allocatable, target :: htmid_cosp(:)            ! height midpoints of COSP radar/lidar output (nht_cosp)
-  real(r8),allocatable, target :: isotherms_mpc_midpoints(:) ! temp midpoints of cuz cloud phase output (9) jks
   real(r8),allocatable         :: htlim_cosp_1d(:)         ! height limits for COSP outputs (nht_cosp+1)
-  real(r8),allocatable         :: isotherms_mpc_bounds(:,:)  ! temp bounds for cuz outputs (2,9?) jks
   real(r8),allocatable         :: htdbze_htmid_cosp(:)     ! (nht_cosp*ndbze_cosp)
   real(r8),allocatable         :: htsr_htmid_cosp(:)       ! (nht_cosp*nsr_cosp)
   real(r8),allocatable         :: htsr_srmid_cosp(:)       ! (nht_cosp*nsr_cosp)
@@ -158,7 +161,6 @@ module cospsimulator_intr
   logical :: cosp_histfile_aux     = .false. ! CAM namelist variable default
   logical :: cosp_lfrac_out        = .false. ! CAM namelist variable default
   logical :: cosp_runall           = .false. ! flag to run all of the cosp simulator package
-  logical :: slf_isotherms         = .false. ! jks adding isos coord bool
   integer :: cosp_ncolumns         = 50      ! CAM namelist variable default
   integer :: cosp_histfile_num     =1        ! CAM namelist variable default, not in COSP namelist 
   integer :: cosp_histfile_aux_num =-1       ! CAM namelist variable default, not in COSP namelist
@@ -352,7 +354,6 @@ CONTAINS
        endif
     endif
     
-    nisotherms_mpc = 9 ! jks
 
     ! Set COSP call frequency, from namelist.
     cosp_nradsteps = cosp_nradsteps_in
@@ -367,8 +368,6 @@ CONTAINS
              htsr_htmid_cosp(nht_cosp*nsr_cosp),htsr_srmid_cosp(nht_cosp*nsr_cosp),                             &
              htmlscol_htmlmid_cosp(nhtml_cosp*nscol_cosp),htmlscol_scol_cosp(nhtml_cosp*nscol_cosp))
     
-    ! jks CUZ allocations
-    allocate(isotherms_mpc_midpoints(nisotherms_mpc),isotherms_mpc_bounds(2,nisotherms_mpc))
 
     ! DJS2017: Just pull from cosp_config
     if (use_vgrid_in) then
@@ -404,13 +403,6 @@ CONTAINS
        htmisrtau_cosp(k) = k
     end do
     
-    ! jks assign CUZ midpoint and bound values:
-    do k=1,nisotherms_mpc
-      isotherms_mpc_midpoints(k)=273.15_r8-5._r8*(nisotherms_mpc-k)
-      isotherms_mpc_bounds(1,k)=isotherms_mpc_midpoints(k)-1.0_r8
-      isotherms_mpc_bounds(2,k)=isotherms_mpc_midpoints(k)+1.0_r8
-    end do
-
 
     ! next, assign collapsed reference vectors for cam_history.F90
     ! convention for saving output = prs1,tau1 ... prs1,tau7 ; prs2,tau1 ... prs2,tau7 etc.
@@ -465,13 +457,32 @@ CONTAINS
     integer :: unitn, ierr
     character(len=*), parameter :: subname = 'cospsimulator_intr_readnl'
 
+    ! jks Do all slf_isotherm operations outside of USE_COSP #ifdef statement
+    namelist /slfsimulator_nl/ slf_isotherms ! jks out of loop. Not sure if this will work.
+#ifdef SPMD
+    call mpibcast(slf_isotherms,        1,  mpilog, 0, mpicom) ! Broadcast namelist variables
+#endif
+
+    nisotherms_mpc = 9 ! jks
+    
+    ! assign midpoint and bound values:
+    do k=1,nisotherms_mpc
+       isotherms_mpc_midpoints(k)=273.15_r8-5._r8*(nisotherms_mpc-k)
+       isotherms_mpc_bounds(1,k)=isotherms_mpc_midpoints(k)-1.0_r8
+       isotherms_mpc_bounds(2,k)=isotherms_mpc_midpoints(k)+1.0_r8
+    end do
+
+    if (slf_isotherms) then
+       write(iulog,*)'  Adding SLF_isotherms (jks)                 = ', slf_isotherms
+    end if
+
 #ifdef USE_COSP
 !!! this list should include any variable that you might want to include in the namelist
 !!! philosophy is to not include COSP output flags but just important COSP settings and cfmip controls. 
     namelist /cospsimulator_nl/ docosp, cosp_active, cosp_amwg, cosp_atrainorbitdata, cosp_cfmip_3hr, cosp_cfmip_da, &
          cosp_cfmip_mon, cosp_cfmip_off, cosp_histfile_num, cosp_histfile_aux, cosp_histfile_aux_num, cosp_isccp, cosp_lfrac_out, &
          cosp_lite, cosp_lradar_sim, cosp_llidar_sim, cosp_lisccp_sim,  cosp_lmisr_sim, cosp_lmodis_sim, cosp_ncolumns, &
-         cosp_nradsteps, cosp_passive, cosp_sample_atrain, cosp_runall, slf_isotherms ! jks
+         cosp_nradsteps, cosp_passive, cosp_sample_atrain, cosp_runall
     
     !! read in the namelist
     if (masterproc) then
@@ -494,7 +505,6 @@ CONTAINS
     call mpibcast(docosp,               1,  mpilog, 0, mpicom)
     !   call mpibcast(cosp_atrainorbitdata, len(cosp_atrainorbitdata), mpichar, 0, mpicom)
     call mpibcast(cosp_amwg,            1,  mpilog, 0, mpicom)
-    call mpibcast(slf_isotherms,        1,  mpilog, 0, mpicom) ! jks set namelist variable here
     call mpibcast(cosp_lite,            1,  mpilog, 0, mpicom)
     call mpibcast(cosp_passive,         1,  mpilog, 0, mpicom)
     call mpibcast(cosp_active,          1,  mpilog, 0, mpicom)
@@ -612,7 +622,7 @@ CONTAINS
     
     !! if no simulators are turned on at all and docosp is, set cosp_amwg = .true.
     if((docosp) .and. (.not.lradar_sim) .and. (.not.llidar_sim) .and. (.not.lisccp_sim) .and. &
-         (.not.lmisr_sim) .and. (.not.lmodis_sim) .and. (.not.slf_isotherms)) then ! jks added slf_isotherms
+         (.not.lmisr_sim) .and. (.not.lmodis_sim)) then
        cosp_amwg = .true.
     end if
     if (cosp_amwg) then
@@ -652,7 +662,6 @@ CONTAINS
           write(iulog,*)'  Write COSP input fields                  = ', cosp_histfile_aux
           write(iulog,*)'  Write COSP input fields to history file  = ', cosp_histfile_aux_num
           write(iulog,*)'  Write COSP subcolumn fields              = ', cosp_lfrac_out
-          write(iulog,*)'  SLF_isotherms added                      = ', slf_isotherms
        else
           write(iulog,*)'COSP not enabled'
        end if
@@ -667,6 +676,13 @@ CONTAINS
 
     use cam_history_support, only: add_hist_coord
     
+    ! jks using namelist option to add new history coordinate for SLF by isotherm
+    if (slf_isotherms) then ! doesn't seem to give the midpoints values, but I guess that's ok.
+      call add_hist_coord('isotherms_mpc', nisotherms_mpc,                                                 &
+         'mixed-phase cloud isotherms (data within 1.0C)', 'C',                                            &
+         isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds)
+    end if
+
 #ifdef USE_COSP
     ! register non-standard variable dimensions
     if (lisccp_sim .or. lmodis_sim) then
@@ -690,14 +706,6 @@ CONTAINS
             'COSP Mean Height for lidar and radar simulator outputs', 'm',     &
             htmid_cosp, bounds_name='cosp_ht_bnds', bounds=htlim_cosp,         &
             vertical_coord=.true.)
-    end if
-
-    ! jks adding namelist option
-    if (slf_isotherms) then
-       call add_hist_coord('isotherms_mpc', nisotherms_mpc,                                                   &   ! jks cheap hack
-          'mixed-phase cloud isotherms (data within 1.0C)', 'C',                                            &
-          isotherms_mpc_midpoints, bounds_name='isotherms_mpc_bounds', bounds=isotherms_mpc_bounds,         &
-          vertical_coord=.true.)
     end if
     
     if (llidar_sim) then
