@@ -1595,6 +1595,7 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    real(r8), pointer :: rel_grid(:,:)
    real(r8), pointer :: rei_grid(:,:)
    real(r8), pointer :: sadice_grid(:,:)
+   real(r8), pointer :: sadliq_grid(:,:) !zsm, jks
    real(r8), pointer :: sadsnow_grid(:,:)
    real(r8), pointer :: dei_grid(:,:)
    real(r8), pointer :: des_grid(:,:)
@@ -3148,6 +3149,7 @@ subroutine micro_mg_cam_tend_pack(state, ptend, dtime, pbuf, mgncol, mgcols, mgr
    call outfld('REL',         rel_grid,         pcols, lchnk)
    call outfld('REI',         rei_grid,         pcols, lchnk)
    call outfld('MG_SADICE',   sadice_grid,      pcols, lchnk)
+   call outfld('MG_SADLIQ',   sadliq_grid,      pcols, lchnk) !zsm,jks
    call outfld('MG_SADSNOW',  sadsnow_grid,     pcols, lchnk)
    call outfld('ICIMRST',     icimrst_grid_out, pcols, lchnk)
    call outfld('ICWMRST',     icwmrst_grid_out, pcols, lchnk)

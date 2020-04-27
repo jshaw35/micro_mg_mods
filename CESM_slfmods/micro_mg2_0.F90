@@ -1993,9 +1993,8 @@ subroutine micro_mg_tend ( &
 
         if (do_cldice .and. nitend(i,k).gt.0._r8.and.ni(i,k)+nitend(i,k)*deltat.gt.nimax(i,k)) then
            if (mgrlats(i)*180._r8/3.14159_r8.lt.+66.66667_r8 .or. t(i,k).lt.235.15_r8) then ! jks only ignore NIMAX in the Arctic for clouds T>-38C
-              nitncons(i,k) = nitncons(i,k) + nitend(i,k)-max(0._r8,(nimax(i,k)-ni(i,k))/deltat) !AL
               nitend(i,k)=max(0._r8,(nimax(i,k)-ni(i,k))/deltat)
-           end if 
+           end if
         end if
 
      end do
@@ -3141,7 +3140,7 @@ end subroutine calc_rercld
 !UTILITIES
 !========================================================================
 
-pure subroutine micro_mg_get_cols(lchnk, ncol, nlev, top_lev, qcn, qin, & ! jks
+subroutine micro_mg_get_cols(lchnk, ncol, nlev, top_lev, qcn, qin, & ! jks, removed pure
      qrn, qsn, mgncol, mgcols, mgrlats) ! jks
 
   ! Determines which columns microphysics should operate over by
